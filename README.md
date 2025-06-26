@@ -7,6 +7,19 @@ https://cloud.google.com/endpoints/docs/frameworks/java/get-started-frameworks-j
 # -------
 # -------
 
+To run the app in intellij
+
+Open your project in IntelliJ IDEA.
+Go to Run > Edit Configurations...
+Click the + and select Maven.
+Set the command to appengine:run.
+In the Runner tab, check Debug (or just click the bug icon to start in debug mode).
+Apply and run the configuration in debug mode.
+
+# -------
+# -------
+# -------
+
 
 # App Engine Standard & Google Cloud Endpoints Frameworks & Java
 
