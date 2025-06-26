@@ -1,10 +1,10 @@
-package com.example.echo;
+package com.example.echo.endpoints;
 
+import com.example.echo.model.Post;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.Named;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
