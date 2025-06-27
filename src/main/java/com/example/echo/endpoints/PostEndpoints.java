@@ -1,9 +1,11 @@
 package com.example.echo.endpoints;
 
 import com.example.echo.model.Post;
+import com.example.echo.services.PostService;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.Named;
+import com.googlecode.objectify.ObjectifyService;
 
 import java.util.Arrays;
 import java.util.List;
@@ -15,7 +17,7 @@ import java.util.List;
 )
 public class PostEndpoints {
 
-//    private final PostService service = new PostService();
+    private final PostService service = new PostService();
 
     @ApiMethod(name = "createPost", path = "posts", httpMethod = ApiMethod.HttpMethod.POST)
     public Post createPost(Post post) {
@@ -49,9 +51,16 @@ public class PostEndpoints {
             httpMethod = ApiMethod.HttpMethod.GET
     )
     public List<Post> listPosts() {
+
 //        return service.listPosts();
         Post post1 = new Post();
         post1.setAuthor("author1");
+
+
+//        ObjectifyService.ofy().save().entity(post1).now();
+
+        service.createPost(post1, "a@b.c");
+
         return Arrays.asList(post1);
     }
 }

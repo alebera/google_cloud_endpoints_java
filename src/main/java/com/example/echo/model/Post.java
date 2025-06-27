@@ -1,13 +1,13 @@
 package com.example.echo.model;
 
-//import com.googlecode.objectify.annotation.Entity;
-//import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Entity;
+import com.googlecode.objectify.annotation.Id;
 
 import java.util.Date;
 
-//@Entity
+@Entity
 public class Post {
-//    @Id
+    @Id
     private Long id;
     private String author;
     private String subject;
