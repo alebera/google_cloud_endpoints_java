@@ -1,5 +1,6 @@
 package com.example.echo.services;
 
+import com.example.echo.email.TaskQueueUtil;
 import com.example.echo.model.Post;
 import com.googlecode.objectify.ObjectifyService;
 
@@ -13,10 +14,19 @@ public class PostService {
         post.setAuthor(currentUserEmail);
         post.setCreatedAt(new Date());
         post.setUpdatedAt(new Date());
-        return ObjectifyService.run(() -> {
+
+        TaskQueueUtil.enqueueEmailTask(post.getAuthor(), "post email subject", "post email body");
+
+        // save in DB
+        Post post1 = ObjectifyService.run(() -> {
             ObjectifyService.ofy().save().entity(post).now();
             return post;
         });
+
+        // send email
+        TaskQueueUtil.enqueueEmailTask(post1.getAuthor(), "post email subject", "post email body");
+
+        return post1;
     }
 
     public List<Post> listPosts() {
