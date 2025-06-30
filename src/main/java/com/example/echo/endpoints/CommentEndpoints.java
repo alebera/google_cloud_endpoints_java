@@ -5,6 +5,7 @@ import com.example.echo.services.CommentService;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.Named;
+import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,7 +21,7 @@ public class CommentEndpoints {
     private final CommentService service = new CommentService();
 
     @ApiMethod(name = "addComment", path = "posts/{postId}/comments", httpMethod = ApiMethod.HttpMethod.POST)
-    public CommentDto addComment( @Named("postId") Long postId, CommentDto commentDto, HttpServletRequest req) throws UnauthorizedException {
+    public CommentDto addComment( @Named("postId") Long postId, CommentDto commentDto, HttpServletRequest req) throws UnauthorizedException, NotFoundException {
         return service.addComment(commentDto, postId, req);
     }
 

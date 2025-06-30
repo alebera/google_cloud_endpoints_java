@@ -2,11 +2,11 @@ package com.example.echo.services;
 
 import com.example.echo.auth.FirebaseAuthService;
 import com.example.echo.email.TaskQueueUtil;
+import com.example.echo.endpoints.dao.PostDao;
 import com.example.echo.endpoints.dto.PostDto;
 import com.example.echo.model.Post;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
-import com.googlecode.objectify.ObjectifyService;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -14,7 +14,16 @@ import java.util.List;
 
 public class PostService {
 
-    private final FirebaseAuthService authService = new FirebaseAuthService();
+    private FirebaseAuthService authService = new FirebaseAuthService();
+    private PostDao postDao = new PostDao();
+
+    public PostService(FirebaseAuthService authService, PostDao postDao) {
+        this.authService = authService;
+        this.postDao = postDao;
+    }
+
+    public PostService() {
+    }
 
     public PostDto createPost(PostDto postDto, HttpServletRequest req) throws UnauthorizedException {
 
@@ -22,15 +31,10 @@ public class PostService {
 
         postDto.setAuthor(currentUserEmail);
         postDto.setCreatedAt(LocalDateTime.now());
-        postDto.setUpdatedAt(LocalDateTime.now());
 
         Post post = postDto.toEntity();
 
-        Post finalPost = post;
-        post = ObjectifyService.run(() -> {
-            ObjectifyService.ofy().save().entity(finalPost).now();
-            return finalPost;
-        });
+        post = postDao.save(post);
 
         // send email
         TaskQueueUtil.enqueueEmailTask(post.getAuthor(), "Post is created", "You just created a post successfully");
@@ -39,9 +43,7 @@ public class PostService {
     }
 
     public List<PostDto> listPosts() {
-        return ObjectifyService.run(() ->
-                PostDto.fromEntity(ObjectifyService.ofy().load().type(Post.class).list())
-        );
+        return PostDto.fromEntity(postDao.list());
     }
 
     public PostDto getPost(Long id) {
@@ -49,9 +51,7 @@ public class PostService {
     }
 
     private Post getPostEntity(Long id) {
-        return ObjectifyService.run(() ->
-                ObjectifyService.ofy().load().type(Post.class).id(id).now()
-        );
+        return postDao.findById(id);
     }
 
     public PostDto updatePost(PostDto postDto, Long postId, HttpServletRequest req) throws UnauthorizedException, NotFoundException {
@@ -70,11 +70,7 @@ public class PostService {
         existingPost.setSubject(postDto.getSubject());
         existingPost.setUpdatedAt(LocalDateTime.now());
 
-        Post finalExistingPost = existingPost;
-        existingPost = ObjectifyService.run(() -> {
-            ObjectifyService.ofy().save().entity(finalExistingPost).now();
-            return finalExistingPost;
-        });
+        postDao.save(existingPost);
 
         return PostDto.fromEntity(existingPost);
     }
