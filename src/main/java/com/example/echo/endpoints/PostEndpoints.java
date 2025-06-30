@@ -1,12 +1,16 @@
 package com.example.echo.endpoints;
 
+import com.example.echo.auth.FirebaseAuthService;
 import com.example.echo.model.Post;
 import com.example.echo.services.PostService;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.Named;
+import com.google.api.server.spi.response.UnauthorizedException;
 import com.googlecode.objectify.ObjectifyService;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.List;
 
@@ -18,15 +22,14 @@ import java.util.List;
 public class PostEndpoints {
 
     private final PostService service = new PostService();
+    private final FirebaseAuthService authService = new FirebaseAuthService();
 
     @ApiMethod(name = "createPost", path = "posts", httpMethod = ApiMethod.HttpMethod.POST)
-    public Post createPost(Post post) {
-        String currentUserEmail = "user@example.com";
-//        return service.createPost(post, currentUserEmail);
-        Post post1 = new Post();
-        post1.setAuthor("author1");
-        return post1;
+    public Post createPost(Post post, HttpServletRequest req) throws UnauthorizedException {
+        String currentUserEmail = authService.getEmailFromToken(req);
+        return service.createPost(post, currentUserEmail);
     }
+
 
     @ApiMethod(name = "getPost", path = "posts/{id}", httpMethod = ApiMethod.HttpMethod.GET)
     public Post getPost(@Named("id") Long id) {
