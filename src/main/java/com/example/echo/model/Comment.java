@@ -3,6 +3,7 @@ package com.example.echo.model;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -12,7 +13,7 @@ public class Comment {
     private Long postId;
     private String author;
     private String body;
-    private Date createdAt;
+    private LocalDateTime createdAt;
 
     public Long getId() {
         return id;
@@ -46,11 +47,11 @@ public class Comment {
         this.body = body;
     }
 
-    public Date getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
 }

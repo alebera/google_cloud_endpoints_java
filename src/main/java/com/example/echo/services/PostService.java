@@ -1,49 +1,78 @@
 package com.example.echo.services;
 
+import com.example.echo.auth.FirebaseAuthService;
 import com.example.echo.email.TaskQueueUtil;
+import com.example.echo.endpoints.dto.PostDto;
 import com.example.echo.model.Post;
+import com.google.api.server.spi.response.NotFoundException;
+import com.google.api.server.spi.response.UnauthorizedException;
 import com.googlecode.objectify.ObjectifyService;
 
-import java.util.Date;
+import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public class PostService {
 
+    private final FirebaseAuthService authService = new FirebaseAuthService();
 
-    public Post createPost(Post post, String currentUserEmail) {
-        post.setAuthor(currentUserEmail);
-        post.setCreatedAt(new Date());
-        post.setUpdatedAt(new Date());
+    public PostDto createPost(PostDto postDto, HttpServletRequest req) throws UnauthorizedException {
 
-        TaskQueueUtil.enqueueEmailTask(post.getAuthor(), "post email subject", "post email body");
+        String currentUserEmail = authService.verifyToken(req).getEmail();
+
+        postDto.setAuthor(currentUserEmail);
+        postDto.setCreatedAt(LocalDateTime.now());
+        postDto.setUpdatedAt(LocalDateTime.now());
+
+        TaskQueueUtil.enqueueEmailTask(postDto.getAuthor(), "post email subject", "post email body");
+
+        Post post = postDto.toEntity();
 
         // save in DB
-        Post post1 = ObjectifyService.run(() -> {
-            ObjectifyService.ofy().save().entity(post).now();
-            return post;
+        Post finalPost = post;
+        post = ObjectifyService.run(() -> {
+            ObjectifyService.ofy().save().entity(finalPost).now();
+            return finalPost;
         });
 
         // send email
-        TaskQueueUtil.enqueueEmailTask(post1.getAuthor(), "post email subject", "post email body");
+        TaskQueueUtil.enqueueEmailTask(post.getAuthor(), "post email subject", "post email body");
 
-        return post1;
+        return PostDto.fromEntity(post);
     }
 
-    public List<Post> listPosts() {
-        return ObjectifyService.ofy().load().type(Post.class).list();
+    public List<PostDto> listPosts() {
+        return PostDto.fromEntity(ObjectifyService.ofy().load().type(Post.class).list());
     }
 
-    public Post getPost(Long id) {
+    public PostDto getPost(Long id) {
+        return PostDto.fromEntity(getPostEntity(id));
+    }
+
+    private Post getPostEntity(Long id) {
         return ObjectifyService.ofy().load().type(Post.class).id(id).now();
     }
 
-    public Post updatePost(Post post, String currentUserEmail) {
-        Post existing = getPost(post.getId());
-        if (existing == null || !existing.getAuthor().equals(currentUserEmail)) {
-            throw new RuntimeException("Unauthorized");
+    public PostDto updatePost(PostDto postDto, HttpServletRequest req) throws UnauthorizedException, NotFoundException {
+
+        String currentUserEmail = authService.verifyToken(req).getEmail();
+
+        Post existingPost = getPostEntity(postDto.getId());
+        if (existingPost == null) {
+            throw new NotFoundException("Unauthorized");
         }
-        post.setUpdatedAt(new Date());
-        ObjectifyService.ofy().save().entity(post).now();
-        return post;
+        if (!existingPost.isFromAuthor(currentUserEmail)) {
+            throw new UnauthorizedException("No privileges to update the post");
+        }
+
+        existingPost.setBody(postDto.getBody());
+        existingPost.setSubject(postDto.getSubject());
+
+
+        existingPost.setUpdatedAt(LocalDateTime.now());
+
+        ObjectifyService.ofy().save().entity(existingPost).now();
+
+        return PostDto.fromEntity(existingPost);
     }
 }

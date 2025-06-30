@@ -1,16 +1,16 @@
 package com.example.echo.endpoints;
 
 import com.example.echo.auth.FirebaseAuthService;
+import com.example.echo.endpoints.dto.PostDto;
 import com.example.echo.model.Post;
 import com.example.echo.services.PostService;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.Named;
+import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
-import com.googlecode.objectify.ObjectifyService;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.List;
 
@@ -22,30 +22,21 @@ import java.util.List;
 public class PostEndpoints {
 
     private final PostService service = new PostService();
-    private final FirebaseAuthService authService = new FirebaseAuthService();
 
     @ApiMethod(name = "createPost", path = "posts", httpMethod = ApiMethod.HttpMethod.POST)
-    public Post createPost(Post post, HttpServletRequest req) throws UnauthorizedException {
-        String currentUserEmail = authService.getEmailFromToken(req);
-        return service.createPost(post, currentUserEmail);
+    public PostDto createPost(PostDto postDto, HttpServletRequest req) throws UnauthorizedException {
+        return service.createPost(postDto, req);
     }
 
 
     @ApiMethod(name = "getPost", path = "posts/{id}", httpMethod = ApiMethod.HttpMethod.GET)
-    public Post getPost(@Named("id") Long id) {
-//        return service.getPost(id);
-        Post post1 = new Post();
-        post1.setAuthor("author1");
-        return post1;
+    public PostDto getPost(@Named("id") Long id) {
+        return service.getPost(id);
     }
 
     @ApiMethod(name = "updatePost", path = "posts", httpMethod = ApiMethod.HttpMethod.PUT)
-    public Post updatePost(Post post) {
-        String currentUserEmail = "user@example.com";
-//        return service.updatePost(post, currentUserEmail);
-        Post post1 = new Post();
-        post1.setAuthor("author1");
-        return post1;
+    public PostDto updatePost(PostDto postDto, HttpServletRequest req) throws UnauthorizedException, NotFoundException {
+        return service.updatePost(postDto, req);
     }
 
     @ApiMethod(
@@ -53,18 +44,8 @@ public class PostEndpoints {
             path = "posts",
             httpMethod = ApiMethod.HttpMethod.GET
     )
-    public List<Post> listPosts() {
-
-//        return service.listPosts();
-        Post post1 = new Post();
-        post1.setAuthor("author1");
-
-
-//        ObjectifyService.ofy().save().entity(post1).now();
-
-        service.createPost(post1, "a@b.c");
-
-        return Arrays.asList(post1);
+    public List<PostDto> listPosts() {
+        return service.listPosts();
     }
 }
 

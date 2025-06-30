@@ -8,7 +8,7 @@ import javax.servlet.http.HttpServletRequest;
 
 public class FirebaseAuthService {
 
-    public String getEmailFromToken(HttpServletRequest req) throws UnauthorizedException {
+    public FirebaseToken verifyToken(HttpServletRequest req) throws UnauthorizedException {
         String bearerToken= req.getHeader("Authorization");
         System.out.println("bearerToken ---> ");
         System.out.println(bearerToken);
@@ -22,7 +22,7 @@ public class FirebaseAuthService {
             }
             String idToken = bearerToken.substring(7);
             FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
-            return decodedToken.getEmail();
+            return decodedToken;
         } catch (Exception e) {
             throw new UnauthorizedException("Invalid or expired token");
         }
