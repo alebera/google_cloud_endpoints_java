@@ -1,8 +1,6 @@
 package com.example.echo.endpoints;
 
-import com.example.echo.auth.FirebaseAuthService;
 import com.example.echo.endpoints.dto.PostDto;
-import com.example.echo.model.Post;
 import com.example.echo.services.PostService;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
@@ -11,11 +9,10 @@ import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 
 import javax.servlet.http.HttpServletRequest;
-import java.util.Arrays;
 import java.util.List;
 
 @Api(
-        name = "postApi",
+        name = "post",
         version = "v1",
         description = "API to handle post"
 )
@@ -34,9 +31,9 @@ public class PostEndpoints {
         return service.getPost(id);
     }
 
-    @ApiMethod(name = "updatePost", path = "posts", httpMethod = ApiMethod.HttpMethod.PUT)
-    public PostDto updatePost(PostDto postDto, HttpServletRequest req) throws UnauthorizedException, NotFoundException {
-        return service.updatePost(postDto, req);
+    @ApiMethod(name = "updatePost", path = "posts/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
+    public PostDto updatePost(@Named("id") Long postId, PostDto postDto, HttpServletRequest req) throws UnauthorizedException, NotFoundException {
+        return service.updatePost(postDto, postId, req);
     }
 
     @ApiMethod(

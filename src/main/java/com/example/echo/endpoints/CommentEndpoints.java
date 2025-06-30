@@ -1,36 +1,31 @@
 package com.example.echo.endpoints;
 
-import com.example.echo.model.Comment;
+import com.example.echo.endpoints.dto.CommentDto;
+import com.example.echo.services.CommentService;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.Named;
+import com.google.api.server.spi.response.UnauthorizedException;
 
-import java.util.Arrays;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 
 @Api(
-        name = "commentApi",
+        name = "comment",
         version = "v1",
         description = "API to handle comments"
 )
 public class CommentEndpoints {
 
-//    private final CommentService service = new CommentService();
+    private final CommentService service = new CommentService();
 
-    @ApiMethod(name = "addComment", path = "comments", httpMethod = ApiMethod.HttpMethod.POST)
-    public Comment addComment(Comment comment) {
-        String currentUserEmail = "user@example.com";
-//        return service.addComment(comment, currentUserEmail);
-        Comment comment1 = new Comment();
-        comment1.setBody("Hello World");
-        return comment1;
+    @ApiMethod(name = "addComment", path = "posts/{postId}/comments", httpMethod = ApiMethod.HttpMethod.POST)
+    public CommentDto addComment( @Named("postId") Long postId, CommentDto commentDto, HttpServletRequest req) throws UnauthorizedException {
+        return service.addComment(commentDto, postId, req);
     }
 
-    @ApiMethod(name = "listComments", path = "comments/{postId}", httpMethod = ApiMethod.HttpMethod.GET)
-    public List<Comment> listComments(@Named("postId") Long postId) {
-//        return service.listCommentsForPost(postId);
-        Comment comment1 = new Comment();
-        comment1.setBody("Hello World");
-        return Arrays.asList(comment1);
+    @ApiMethod(name = "listComments", path = "posts/{postId}/comments", httpMethod = ApiMethod.HttpMethod.GET)
+    public List<CommentDto> listComments(@Named("postId") Long postId) {
+        return service.listCommentsForPost(postId);
     }
 }
