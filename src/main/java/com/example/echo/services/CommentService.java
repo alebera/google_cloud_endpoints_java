@@ -1,8 +1,11 @@
 package com.example.echo.services;
 
 import com.example.echo.auth.FirebaseAuthService;
+import com.example.echo.email.TaskQueueUtil;
 import com.example.echo.endpoints.dto.CommentDto;
 import com.example.echo.model.Comment;
+import com.example.echo.model.Post;
+import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.googlecode.objectify.ObjectifyService;
 
@@ -13,7 +16,12 @@ import java.util.List;
 public class CommentService {
     private final FirebaseAuthService authService = new FirebaseAuthService();
 
-    public CommentDto addComment(CommentDto commentDto, Long postId, HttpServletRequest req) throws UnauthorizedException {
+    public CommentDto addComment(CommentDto commentDto, Long postId, HttpServletRequest req) throws UnauthorizedException, NotFoundException {
+
+        Post existingPost = getPostEntity(postId);
+        if (existingPost == null) {
+            throw new NotFoundException("Post not found");
+        }
 
         String currentUserEmail = authService.verifyToken(req).getEmail();
 
@@ -26,6 +34,10 @@ public class CommentService {
             ObjectifyService.ofy().save().entity(comment).now();
             return null;
         });
+
+        // send email
+        TaskQueueUtil.enqueueEmailTask(existingPost.getAuthor(), "Your post received a comment", "Someone commented on your post, click here to see details ");
+
         return commentDto;
     }
 
@@ -35,5 +47,11 @@ public class CommentService {
                         .filter("postId", postId).list()
         );
         return CommentDto.fromEntity(comments);
+    }
+
+    private Post getPostEntity(Long id) {
+        return ObjectifyService.run(() ->
+                ObjectifyService.ofy().load().type(Post.class).id(id).now()
+        );
     }
 }

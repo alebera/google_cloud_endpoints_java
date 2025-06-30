@@ -18,13 +18,11 @@ public class PostService {
 
     public PostDto createPost(PostDto postDto, HttpServletRequest req) throws UnauthorizedException {
 
-//        String currentUserEmail = authService.verifyToken(req).getEmail();
+        String currentUserEmail = authService.verifyToken(req).getEmail();
 
-//        postDto.setAuthor(currentUserEmail);
+        postDto.setAuthor(currentUserEmail);
         postDto.setCreatedAt(LocalDateTime.now());
         postDto.setUpdatedAt(LocalDateTime.now());
-
-        TaskQueueUtil.enqueueEmailTask(postDto.getAuthor(), "post email subject", "post email body");
 
         Post post = postDto.toEntity();
 
@@ -35,7 +33,7 @@ public class PostService {
         });
 
         // send email
-        TaskQueueUtil.enqueueEmailTask(post.getAuthor(), "post email subject", "post email body");
+        TaskQueueUtil.enqueueEmailTask(post.getAuthor(), "Post is created", "You just created a post successfully");
 
         return PostDto.fromEntity(post);
     }
