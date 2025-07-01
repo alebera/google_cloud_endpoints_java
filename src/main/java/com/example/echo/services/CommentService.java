@@ -50,7 +50,12 @@ public class CommentService {
         return CommentDto.fromEntity(comment);
     }
 
-    public List<CommentDto> listCommentsForPost(Long postId) {
+    public List<CommentDto> listCommentsForPost(Long postId) throws NotFoundException {
+        Post existingPost = postDao.findById(postId);
+        if (existingPost == null) {
+            throw new NotFoundException("Post not found");
+        }
+
         List<Comment> comments = commentDao.listByPostId(postId);
         return CommentDto.fromEntity(comments);
     }

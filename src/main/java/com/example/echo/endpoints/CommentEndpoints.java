@@ -26,7 +26,7 @@ public class CommentEndpoints {
     }
 
     @ApiMethod(name = "listComments", path = "posts/{postId}/comments", httpMethod = ApiMethod.HttpMethod.GET)
-    public List<CommentDto> listComments(@Named("postId") Long postId) {
+    public List<CommentDto> listComments(@Named("postId") Long postId) throws NotFoundException {
         return service.listCommentsForPost(postId);
     }
 }

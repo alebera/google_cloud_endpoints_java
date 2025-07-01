@@ -14,7 +14,9 @@ import org.junit.jupiter.api.Test;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
+import java.util.List;
 
+import static java.util.Arrays.asList;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -37,8 +39,9 @@ class CommentServiceTest {
         jwt = mock(FirebaseToken.class);
     }
 
+    // addComment - START
     @Test
-    void addComment_shouldSetAuthorAndTimestamps() throws UnauthorizedException, NotFoundException {
+    void addComment_success() throws UnauthorizedException, NotFoundException {
         Long postId = 1L;
         CommentDto commentDto = new CommentDto();
         commentDto.setBody("test comment");
@@ -66,10 +69,14 @@ class CommentServiceTest {
         assertEquals("test comment", result.getBody());
         assertEquals(postId, result.getPostId());
         assertNotNull(result.getCreatedAt());
+
+        verify(postDao, times(1)).findById(postId);
+        verify(authService, times(1)).verifyToken(req);
+        verify(commentDao, times(1)).save(any());
     }
 
     @Test
-    void addComment_shouldThrowNotFoundExceptionIfPostMissing() {
+    void addComment_shouldThrowNotFoundExceptionIfPostMissing() throws UnauthorizedException {
         Long postId = 2L;
         CommentDto commentDto = new CommentDto();
         when(postDao.findById(postId)).thenReturn(null);
@@ -77,5 +84,95 @@ class CommentServiceTest {
         assertThrows(NotFoundException.class, () -> {
             commentService.addComment(commentDto, postId, req);
         });
+
+        verify(postDao, times(1)).findById(postId);
+        verify(authService, times(0)).verifyToken(req);
+        verify(commentDao, times(0)).save(any());
     }
+
+    @Test
+    void addComment_shouldThrowUnauthorizedExceptionIfTokenInvalid() throws UnauthorizedException {
+        Long postId = 3L;
+        CommentDto commentDto = new CommentDto();
+        Post post = new Post();
+        post.setId(postId);
+
+        when(postDao.findById(postId)).thenReturn(post);
+        when(authService.verifyToken(req)).thenThrow(new UnauthorizedException("Invalid token"));
+
+        assertThrows(UnauthorizedException.class, () -> {
+            commentService.addComment(commentDto, postId, req);
+        });
+
+        verify(postDao, times(1)).findById(postId);
+        verify(authService, times(1)).verifyToken(req);
+        verify(commentDao, times(0)).save(any());
+    }
+
+    // addComment - END
+
+    // listComment - START
+    @Test
+    void listCommentsForPost_shouldThrowNotFoundExceptionIfPostMissing() {
+        Long postId = 4L;
+        when(postDao.findById(postId)).thenReturn(null);
+
+        assertThrows(NotFoundException.class, () -> {
+            commentService.listCommentsForPost(postId);
+        });
+
+        verify(postDao, times(1)).findById(postId);
+        verify(commentDao, times(0)).listByPostId(postId);
+    }
+
+    @Test
+    void listCommentsForPost_shouldReturnCommentsIfPresent() throws NotFoundException {
+        Long postId = 5L;
+        Post post = new Post();
+        post.setId(postId);
+
+        Comment comment1 = new Comment();
+        comment1.setId(1L);
+        comment1.setPostId(postId);
+        comment1.setBody("Comment 1");
+
+        Comment comment2 = new Comment();
+        comment2.setId(2L);
+        comment2.setPostId(postId);
+        comment2.setBody("Comment 2");
+
+        when(postDao.findById(postId)).thenReturn(post);
+        when(commentDao.listByPostId(postId)).thenReturn(asList(comment1, comment2));
+
+        List<CommentDto> result = commentService.listCommentsForPost(postId);
+
+        assertEquals(2, result.size());
+        assertEquals("Comment 1", result.get(0).getBody());
+        assertEquals("Comment 2", result.get(1).getBody());
+
+        verify(postDao, times(1)).findById(postId);
+        verify(commentDao, times(1)).listByPostId(postId);
+    }
+
+    @Test
+    void listCommentsForPost_shouldReturnEmptyListIfNoComments() throws NotFoundException {
+        Long postId = 6L;
+        Post post = new Post();
+        post.setId(postId);
+
+        when(postDao.findById(postId)).thenReturn(post);
+        when(commentDao.listByPostId(postId)).thenReturn(java.util.Collections.emptyList());
+
+        List<CommentDto> result = commentService.listCommentsForPost(postId);
+
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
+
+        verify(postDao, times(1)).findById(postId);
+        verify(commentDao, times(1)).listByPostId(postId);
+    }
+
+    // listComment - END
+
+
 }
