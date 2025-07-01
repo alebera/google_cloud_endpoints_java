@@ -1,6 +1,6 @@
-package com.example.echo.endpoints.dto;
+package com.example.echo.api.dto;
 
-import com.example.echo.model.Comment;
+import com.example.echo.db.model.Comment;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;

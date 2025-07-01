@@ -1,7 +1,7 @@
 package com.example.echo.config;
 
-import com.example.echo.model.Comment;
-import com.example.echo.model.Post;
+import com.example.echo.db.model.Comment;
+import com.example.echo.db.model.Post;
 import com.google.firebase.FirebaseApp;
 import com.googlecode.objectify.ObjectifyService;
 

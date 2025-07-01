@@ -1,6 +1,6 @@
-package com.example.echo.endpoints;
+package com.example.echo.api.endpoints;
 
-import com.example.echo.endpoints.dto.PostDto;
+import com.example.echo.api.dto.PostDto;
 import com.example.echo.services.PostService;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
@@ -27,7 +27,7 @@ public class PostEndpoints {
 
 
     @ApiMethod(name = "getPost", path = "posts/{id}", httpMethod = ApiMethod.HttpMethod.GET)
-    public PostDto getPost(@Named("id") Long id) {
+    public PostDto getPost(@Named("id") Long id) throws NotFoundException {
         return service.getPost(id);
     }
 

@@ -2,11 +2,11 @@ package com.example.echo.services;
 
 import com.example.echo.auth.FirebaseAuthService;
 import com.example.echo.email.TaskQueueUtil;
-import com.example.echo.endpoints.dao.CommentDao;
-import com.example.echo.endpoints.dao.PostDao;
-import com.example.echo.endpoints.dto.CommentDto;
-import com.example.echo.model.Comment;
-import com.example.echo.model.Post;
+import com.example.echo.db.dao.CommentDao;
+import com.example.echo.db.dao.PostDao;
+import com.example.echo.api.dto.CommentDto;
+import com.example.echo.db.model.Comment;
+import com.example.echo.db.model.Post;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 

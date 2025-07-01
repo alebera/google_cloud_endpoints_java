@@ -1,6 +1,6 @@
-package com.example.echo.endpoints.dao;
+package com.example.echo.db.dao;
 
-import com.example.echo.model.Comment;
+import com.example.echo.db.model.Comment;
 import com.googlecode.objectify.ObjectifyService;
 
 import java.util.List;

@@ -2,9 +2,9 @@ package com.example.echo.services;
 
 import com.example.echo.auth.FirebaseAuthService;
 import com.example.echo.email.TaskQueueUtil;
-import com.example.echo.endpoints.dao.PostDao;
-import com.example.echo.endpoints.dto.PostDto;
-import com.example.echo.model.Post;
+import com.example.echo.db.dao.PostDao;
+import com.example.echo.api.dto.PostDto;
+import com.example.echo.db.model.Post;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 
@@ -46,12 +46,12 @@ public class PostService {
         return PostDto.fromEntity(postDao.list());
     }
 
-    public PostDto getPost(Long id) {
-        return PostDto.fromEntity(getPostEntity(id));
-    }
-
-    private Post getPostEntity(Long id) {
-        return postDao.findById(id);
+    public PostDto getPost(Long postId) throws NotFoundException {
+        Post existingPost = getPostEntity(postId);
+        if (existingPost == null) {
+            throw new NotFoundException("Post not found");
+        }
+        return PostDto.fromEntity(existingPost);
     }
 
     public PostDto updatePost(PostDto postDto, Long postId, HttpServletRequest req) throws UnauthorizedException, NotFoundException {
@@ -73,5 +73,9 @@ public class PostService {
         postDao.save(existingPost);
 
         return PostDto.fromEntity(existingPost);
+    }
+
+    private Post getPostEntity(Long id) {
+        return postDao.findById(id);
     }
 }

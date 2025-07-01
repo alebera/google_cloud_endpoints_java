@@ -1,19 +1,19 @@
-package com.example.echo.model;
+package com.example.echo.db.model;
 
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Entity
-public class Comment {
-   @Id
+public class Post {
+    @Id
     private Long id;
-    private Long postId;
     private String author;
+    private String subject;
     private String body;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 
     public Long getId() {
         return id;
@@ -23,20 +23,20 @@ public class Comment {
         this.id = id;
     }
 
-    public Long getPostId() {
-        return postId;
-    }
-
-    public void setPostId(Long postId) {
-        this.postId = postId;
-    }
-
     public String getAuthor() {
         return author;
     }
 
     public void setAuthor(String author) {
         this.author = author;
+    }
+
+    public String getSubject() {
+        return subject;
+    }
+
+    public void setSubject(String subject) {
+        this.subject = subject;
     }
 
     public String getBody() {
@@ -54,5 +54,17 @@ public class Comment {
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
     }
-}
 
+    public LocalDateTime getUpdatedAt() {
+        return updatedAt;
+    }
+
+    public void setUpdatedAt(LocalDateTime updatedAt) {
+        this.updatedAt = updatedAt;
+    }
+
+    public boolean isFromAuthor(String author){
+        return this.author.equals(author);
+    }
+
+}

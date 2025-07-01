@@ -1,6 +1,6 @@
-package com.example.echo.endpoints.dto;
+package com.example.echo.api.dto;
 
-import com.example.echo.model.Post;
+import com.example.echo.db.model.Post;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;

@@ -1,6 +1,6 @@
-package com.example.echo.endpoints;
+package com.example.echo.api.endpoints;
 
-import com.example.echo.endpoints.dto.CommentDto;
+import com.example.echo.api.dto.CommentDto;
 import com.example.echo.services.CommentService;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
