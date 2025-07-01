@@ -1,26 +1,81 @@
+# Blog API - Usage Guide
+
+## Setup
+
+```shell
 gcloud config set project xxxxxxxx-205215
 mvn clean install
 mvn appengine:run -Dappengine.projectId=xxxxxxxx-205215
+```
 
 https://cloud.google.com/endpoints/docs/frameworks/java/get-started-frameworks-java
+
+## Data example:
+
+# Post :
+```json
+{
+"id": 1,
+"author": "userXXXXXX@example.com",
+"subject": "Sample Post Subject",
+"body": "This is the body of the post.",
+"createdAt": "2025-06-30T12:34:56",
+"updatedAt": "2025-06-30T12:34:56"
+}
+```
+
+# Comment
+```json
+{
+  "id": 1,
+  "postId": 1,
+  "author": "userXXXXXX@example.com",
+  "body": "This is the body of the post.",
+  "createdAt": "2025-06-30T12:34:56"
+}
+```
 
 
 ## CURL commands for APIs
 
-# 1. Create a new post
-curl -X POST -H "Content-Type: application/json" -d '{"title":"Test Post","content":"Hello world"}' http://localhost:8080/_ah/api/postApi/v1/posts
+# 1. Create a new post 
+This endpoint is protected by JWT
+```shell
+curl -X POST -H "Content-Type: application/json" \
+-H "Authorization: Bearer <YOUR_ID_TOKEN>" \
+-d '{"author":"John Doe","subject":"Title","body":"My first post"}' \
+http://localhost:8080/_ah/api/post/v1/posts
+```
 
-# 2. Get a post by ID (replace {id} with the real ID)
-curl http://localhost:8080/_ah/api/postApi/v1/posts/{id}
+# 2. Get a post by ID (replace {postId} with the real post ID)
+```shell
+curl http://localhost:8080/_ah/api/post/v1/posts/{postId}
+```
 
-# 3. Update a post (replace the fields and the ID)
-curl -X PUT -H "Content-Type: application/json" -d '{"id":1,"title":"Updated","content":"Updated content"}' http://localhost:8080/_ah/api/postApi/v1/posts
+# 3. Update a post (replace {postId} with the real post ID)
+This endpoint is protected by JWT
+```shell
+curl -X PUT -H "Content-Type: application/json" \
+-H "Authorization: Bearer <YOUR_ID_TOKEN>" \
+-d '{"id":1", author":"John Doe","subject":"Title","body":"My first post", "createdAt": "2025-06-30T12:34:56"}' \ \
+http://localhost:8080/_ah/api/post/v1/posts/{postId}
+```
 
 # 4. List all posts
-curl http://localhost:8080/_ah/api/postApi/v1/posts
+```shell
+curl http://localhost:8080/_ah/api/post/v1/posts
+```
 
 # 5. Add a comment
-curl -X POST -H "Content-Type: application/json" -d '{"postId":1,"content":"Nice post!"}' http://localhost:8080/_ah/api/commentApi/v1/comments
+This endpoint is protected by JWT
+```shell
+curl -X POST -H "Content-Type: application/json" \
+-H "Authorization: Bearer <YOUR_ID_TOKEN>" \
+-d '{"postId":1, "author":"Max Delpiero","body":"Nice post!"}' \
+http://localhost:8080/_ah/api/comment/v1/posts/1/comments
+```
 
-# 6. List comments for a post (replace {postId} with the real ID)
-curl http://localhost:8080/_ah/api/commentApi/v1/comments/{postId}
+# 6. List comments for a post (replace {postId} with the real post ID)
+```shell
+curl http://localhost:8080/_ah/api/comment/v1/posts/{postId}/comments
+```

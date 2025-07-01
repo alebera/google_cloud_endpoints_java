@@ -10,7 +10,6 @@ public class FirebaseAuthService {
 
     public FirebaseToken verifyToken(HttpServletRequest req) throws UnauthorizedException {
         String bearerToken= req.getHeader("Authorization");
-        System.out.println("bearerToken ---> ");
         System.out.println(bearerToken);
         if (bearerToken == null) {
             throw new UnauthorizedException("Missing Authorization header");
