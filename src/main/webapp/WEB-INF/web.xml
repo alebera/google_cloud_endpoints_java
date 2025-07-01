@@ -22,7 +22,7 @@
         <servlet-class>com.google.api.server.spi.EndpointsServlet</servlet-class>
         <init-param>
             <param-name>services</param-name>
-            <param-value>com.example.echo.api.endpoints.PostEndpoints,com.example.echo.api.endpoints.CommentEndpoints</param-value>
+            <param-value>com.crystalloids.alessandro.berardinelli.api.endpoints.PostEndpoints,com.crystalloids.alessandro.berardinelli.api.endpoints.CommentEndpoints</param-value>
         </init-param>
     </servlet>
 
