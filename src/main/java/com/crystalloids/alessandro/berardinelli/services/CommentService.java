@@ -1,6 +1,7 @@
 package com.crystalloids.alessandro.berardinelli.services;
 
 import com.crystalloids.alessandro.berardinelli.api.dto.CommentDto;
+import com.crystalloids.alessandro.berardinelli.api.mappers.CommentMapper;
 import com.crystalloids.alessandro.berardinelli.auth.AuthService;
 import com.crystalloids.alessandro.berardinelli.db.dao.CommentDao;
 import com.crystalloids.alessandro.berardinelli.db.dao.PostDao;
@@ -25,12 +26,14 @@ public class CommentService {
     private CommentDao commentDao;
     private PostDao postDao;
     private TaskQueueService taskQueueService;
+    private CommentMapper commentMapper;
 
-    public CommentService(AuthService authService, CommentDao commentDao, PostDao postDao, TaskQueueService taskQueueService) {
+    public CommentService(AuthService authService, CommentDao commentDao, PostDao postDao, TaskQueueService taskQueueService, CommentMapper commentMapper) {
         this.authService = authService;
         this.commentDao = commentDao;
         this.postDao = postDao;
         this.taskQueueService = taskQueueService;
+        this.commentMapper = commentMapper;
     }
 
     public CommentService() {
@@ -48,16 +51,16 @@ public class CommentService {
         commentDto.setAuthor(currentUserEmail);
         commentDto.setCreatedAt(LocalDateTime.now());
         commentDto.setPostId(postId);
-        Comment comment = commentDto.toEntity();
+
+        Comment comment = commentMapper.toEntity(commentDto);
 
         comment = commentDao.save(comment);
 
-        // send email
         taskQueueService.enqueueEmailTask(existingPost.getAuthor(), EMAIL_SUBJECT, EMAIL_CONTENT);
 
         logger.info("Comment added on post {}", postId);
 
-        return CommentDto.fromEntity(comment);
+        return commentMapper.toDto(comment);
     }
 
     public List<CommentDto> listCommentsForPost(Long postId) throws NotFoundException {
@@ -67,7 +70,6 @@ public class CommentService {
         }
 
         List<Comment> comments = commentDao.listByPostId(postId);
-        return CommentDto.fromEntity(comments);
-    }
+        return commentMapper.toDto(comments);}
 
 }

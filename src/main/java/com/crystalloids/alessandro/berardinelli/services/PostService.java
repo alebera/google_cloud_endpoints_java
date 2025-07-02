@@ -1,6 +1,7 @@
 package com.crystalloids.alessandro.berardinelli.services;
 
 import com.crystalloids.alessandro.berardinelli.api.dto.PostDto;
+import com.crystalloids.alessandro.berardinelli.api.mappers.PostMapper;
 import com.crystalloids.alessandro.berardinelli.auth.AuthService;
 import com.crystalloids.alessandro.berardinelli.db.dao.PostDao;
 import com.crystalloids.alessandro.berardinelli.db.model.Post;
@@ -23,11 +24,13 @@ public class PostService {
     private AuthService authService;
     private PostDao postDao;
     private TaskQueueService taskQueueService;
+    private PostMapper postMapper;
 
-    public PostService(AuthService authService, PostDao postDao, TaskQueueService taskQueueService) {
+    public PostService(AuthService authService, PostDao postDao, TaskQueueService taskQueueService, PostMapper postMapper) {
         this.authService = authService;
         this.postDao = postDao;
         this.taskQueueService = taskQueueService;
+        this.postMapper = postMapper;
     }
 
     public PostService() {
@@ -40,7 +43,7 @@ public class PostService {
         postDto.setAuthor(currentUserEmail);
         postDto.setCreatedAt(LocalDateTime.now());
 
-        Post post = postDto.toEntity();
+        Post post = postMapper.toEntity(postDto);
 
         post = postDao.save(post);
 
@@ -49,11 +52,11 @@ public class PostService {
 
         logger.info("New post is created");
 
-        return PostDto.fromEntity(post);
+        return postMapper.toDto(post);
     }
 
     public List<PostDto> listPosts() {
-        return PostDto.fromEntity(postDao.list());
+        return postMapper.toDto(postDao.list());
     }
 
     public PostDto getPost(Long postId) throws NotFoundException {
@@ -61,7 +64,7 @@ public class PostService {
         if (existingPost == null) {
             throw new NotFoundException("Post not found");
         }
-        return PostDto.fromEntity(existingPost);
+        return postMapper.toDto(existingPost);
     }
 
     public PostDto updatePost(PostDto postDto, Long postId, HttpServletRequest req) throws UnauthorizedException, NotFoundException {
@@ -84,7 +87,7 @@ public class PostService {
 
         logger.info("Post with id {} is updated", postId);
 
-        return PostDto.fromEntity(existingPost);
+        return postMapper.toDto(existingPost);
     }
 
     private Post getPostEntity(Long id) {

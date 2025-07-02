@@ -1,6 +1,7 @@
 package com.crystalloids.alessandro.berardinelli.api.endpoints;
 
 import com.crystalloids.alessandro.berardinelli.api.dto.CommentDto;
+import com.crystalloids.alessandro.berardinelli.api.mappers.CommentMapper;
 import com.crystalloids.alessandro.berardinelli.auth.AuthService;
 import com.crystalloids.alessandro.berardinelli.auth.FirebaseAuthService;
 import com.crystalloids.alessandro.berardinelli.db.dao.CommentDao;
@@ -27,7 +28,8 @@ public class CommentEndpoints {
     private CommentDao commentDao = new CommentDao();
     private PostDao postDao = new PostDao();
     private TaskQueueService taskQueueService = new TaskQueueService();
-    private final CommentService service = new CommentService(authService, commentDao, postDao, taskQueueService);
+    private CommentMapper commentMapper = new CommentMapper();
+    private final CommentService service = new CommentService(authService, commentDao, postDao, taskQueueService, commentMapper);
 
     @ApiMethod(name = "addComment", path = "posts/{postId}/comments", httpMethod = ApiMethod.HttpMethod.POST)
     public CommentDto addComment( @Named("postId") Long postId, CommentDto commentDto, HttpServletRequest req) throws UnauthorizedException, NotFoundException {

@@ -30,36 +30,4 @@ public class PostDto {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime updatedAt;
-
-    // Mapping from entity to DTO
-    public static PostDto fromEntity(Post post) {
-        PostDto dto = new PostDto();
-        dto.setId(post.getId());
-        dto.setAuthor(post.getAuthor());
-        dto.setSubject(post.getSubject());
-        dto.setBody(post.getBody());
-        dto.setCreatedAt(post.getCreatedAt());
-        dto.setUpdatedAt(post.getUpdatedAt());
-        return dto;
-    }
-
-    public static List<PostDto> fromEntity(List<Post> posts) {
-        List<PostDto> dtos = new ArrayList<>();
-        for (Post post : posts) {
-            dtos.add(fromEntity(post));
-        }
-        return dtos;
-    }
-
-    // Mapping from DTO to entity
-    public Post toEntity() {
-        Post post = new Post();
-        post.setId(this.id);
-        post.setAuthor(this.author);
-        post.setSubject(this.subject);
-        post.setBody(this.body);
-        post.setCreatedAt(this.createdAt);
-        post.setUpdatedAt(this.updatedAt);
-        return post;
-    }
 }

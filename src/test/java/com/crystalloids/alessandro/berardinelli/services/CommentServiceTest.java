@@ -1,6 +1,7 @@
 package com.crystalloids.alessandro.berardinelli.services;
 
 import com.crystalloids.alessandro.berardinelli.api.dto.CommentDto;
+import com.crystalloids.alessandro.berardinelli.api.mappers.CommentMapper;
 import com.crystalloids.alessandro.berardinelli.auth.FirebaseAuthService;
 import com.crystalloids.alessandro.berardinelli.db.dao.CommentDao;
 import com.crystalloids.alessandro.berardinelli.db.dao.PostDao;
@@ -28,6 +29,7 @@ class CommentServiceTest {
     private PostDao postDao;
     private TaskQueueService taskQueueService;
     private HttpServletRequest req;
+    private CommentMapper commentMapper;
 
     @BeforeEach
     void setUp() {
@@ -35,7 +37,8 @@ class CommentServiceTest {
         commentDao = mock(CommentDao.class);
         postDao = mock(PostDao.class);
         taskQueueService = mock(TaskQueueService.class);
-        commentService = new CommentService(authService, commentDao, postDao, taskQueueService);
+        commentMapper = new CommentMapper();
+        commentService = new CommentService(authService, commentDao, postDao, taskQueueService, commentMapper);
         req = mock(HttpServletRequest.class);
     }
 

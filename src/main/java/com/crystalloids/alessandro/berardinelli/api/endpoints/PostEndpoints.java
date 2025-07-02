@@ -1,6 +1,7 @@
 package com.crystalloids.alessandro.berardinelli.api.endpoints;
 
 import com.crystalloids.alessandro.berardinelli.api.dto.PostDto;
+import com.crystalloids.alessandro.berardinelli.api.mappers.PostMapper;
 import com.crystalloids.alessandro.berardinelli.auth.AuthService;
 import com.crystalloids.alessandro.berardinelli.auth.FirebaseAuthService;
 import com.crystalloids.alessandro.berardinelli.db.dao.PostDao;
@@ -25,7 +26,8 @@ public class PostEndpoints {
     private AuthService authService = new FirebaseAuthService();
     private PostDao postDao = new PostDao();
     private TaskQueueService taskQueueService = new TaskQueueService();
-    private final PostService service = new PostService(authService, postDao, taskQueueService);
+    private PostMapper postMapper = new PostMapper();
+    private final PostService service = new PostService(authService, postDao, taskQueueService, postMapper);
 
     @ApiMethod(name = "createPost", path = "posts", httpMethod = ApiMethod.HttpMethod.POST)
     public PostDto createPost(PostDto postDto, HttpServletRequest req) throws UnauthorizedException {

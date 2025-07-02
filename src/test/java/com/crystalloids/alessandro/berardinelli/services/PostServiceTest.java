@@ -1,6 +1,7 @@
 package com.crystalloids.alessandro.berardinelli.services;
 
 import com.crystalloids.alessandro.berardinelli.api.dto.PostDto;
+import com.crystalloids.alessandro.berardinelli.api.mappers.PostMapper;
 import com.crystalloids.alessandro.berardinelli.auth.FirebaseAuthService;
 import com.crystalloids.alessandro.berardinelli.db.dao.PostDao;
 import com.crystalloids.alessandro.berardinelli.db.model.Post;
@@ -27,13 +28,15 @@ class PostServiceTest {
     private TaskQueueService taskQueueService;
     private HttpServletRequest req;
     private FirebaseAuthService authService;
+    private PostMapper postMapper;
 
     @BeforeEach
     void setUp() {
         authService = mock(FirebaseAuthService.class);
         postDao = mock(PostDao.class);
         taskQueueService = mock(TaskQueueService.class);
-        postService = new PostService(authService, postDao, taskQueueService);
+        postMapper = new PostMapper();
+        postService = new PostService(authService, postDao, taskQueueService, postMapper);
         req = mock(HttpServletRequest.class);
     }
 

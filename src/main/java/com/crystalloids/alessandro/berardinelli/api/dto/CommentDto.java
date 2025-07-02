@@ -27,34 +27,4 @@ public class CommentDto {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime createdAt;
-
-
-    public static CommentDto fromEntity(Comment comment) {
-        CommentDto dto = new CommentDto();
-        dto.setId(comment.getId());
-        dto.setPostId(comment.getPostId());
-        dto.setAuthor(comment.getAuthor());
-        dto.setBody(comment.getBody());
-        dto.setCreatedAt(comment.getCreatedAt());
-        return dto;
-    }
-
-    public static List<CommentDto> fromEntity(List<Comment> comments) {
-        List<CommentDto> dtos = new ArrayList<>();
-        for (Comment comment : comments) {
-            dtos.add(fromEntity(comment));
-        }
-        return dtos;
-    }
-
-    // Mapping from DTO to entity
-    public Comment toEntity() {
-        Comment comment = new Comment();
-        comment.setId(this.id);
-        comment.setPostId(this.postId);
-        comment.setAuthor(this.author);
-        comment.setBody(this.body);
-        comment.setCreatedAt(this.createdAt);
-        return comment;
-    }
 }
