@@ -28,8 +28,7 @@ public class CommentDto {
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime createdAt;
 
-    //TODO: try to use mapstruct ro map
-    // Mapping from entity to DTO
+
     public static CommentDto fromEntity(Comment comment) {
         CommentDto dto = new CommentDto();
         dto.setId(comment.getId());
