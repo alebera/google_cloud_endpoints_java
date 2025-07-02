@@ -2,15 +2,22 @@ package com.crystalloids.alessandro.berardinelli.services;
 
 import com.crystalloids.alessandro.berardinelli.api.dto.PostDto;
 import com.crystalloids.alessandro.berardinelli.api.mappers.PostMapper;
+import com.crystalloids.alessandro.berardinelli.api.validators.PostValidator;
 import com.crystalloids.alessandro.berardinelli.auth.FirebaseAuthService;
 import com.crystalloids.alessandro.berardinelli.db.dao.PostDao;
 import com.crystalloids.alessandro.berardinelli.db.model.Post;
 import com.crystalloids.alessandro.berardinelli.email.TaskQueueService;
+import com.google.api.server.spi.response.BadRequestException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.Arguments;
+
+import java.util.stream.Stream;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -29,6 +36,7 @@ class PostServiceTest {
     private HttpServletRequest req;
     private FirebaseAuthService authService;
     private PostMapper postMapper;
+    private PostValidator postValidator;
 
     @BeforeEach
     void setUp() {
@@ -36,14 +44,16 @@ class PostServiceTest {
         postDao = mock(PostDao.class);
         taskQueueService = mock(TaskQueueService.class);
         postMapper = new PostMapper();
-        postService = new PostService(authService, postDao, taskQueueService, postMapper);
+        postValidator = new PostValidator();
+
+        postService = new PostService(authService, postDao, taskQueueService, postMapper, postValidator);
         req = mock(HttpServletRequest.class);
     }
 
     // createPost - START
 
     @Test
-    void createPost_shouldCreateAPost() throws UnauthorizedException {
+    void createPost_shouldCreateAPost() throws UnauthorizedException, BadRequestException {
         PostDto postDto = new PostDto();
         postDto.setSubject("new post");
         postDto.setBody("lorem ipsum");
@@ -80,6 +90,8 @@ class PostServiceTest {
     @Test
     void createPost_shouldThrowUnauthorizedExceptionIfTokenInvalid() throws UnauthorizedException {
         PostDto postDto = new PostDto();
+        postDto.setSubject("subject text");
+        postDto.setBody("body text");
         when(authService.verifyUser(req)).thenThrow(new UnauthorizedException("Invalid token"));
 
         assertThrows(UnauthorizedException.class, () -> {
@@ -91,6 +103,32 @@ class PostServiceTest {
         verify(taskQueueService, times(0)).enqueueEmailTask(any(),any(),any());
     }
 
+    @ParameterizedTest
+    @MethodSource("invalidPostProvider")
+    void createPost_shouldThrowBadRequestExceptionIfSubjectOrBodyIsInvalid(String subject, String body) throws UnauthorizedException {
+        PostDto postDto = new PostDto();
+        postDto.setSubject(subject);
+        postDto.setBody(body);
+
+        assertThrows(BadRequestException.class, () -> {
+            postService.createPost(postDto, req);
+        });
+
+        verify(authService, times(0)).verifyUser(any());
+        verify(postDao, times(0)).save(any());
+        verify(taskQueueService, times(0)).enqueueEmailTask(any(), any(), any());
+    }
+
+    private static Stream<Arguments> invalidPostProvider() {
+        return Stream.of(
+            Arguments.of(null, "body text"),
+            Arguments.of("", "body text"),
+            Arguments.of("subject text", null),
+            Arguments.of("subject text", ""),
+            Arguments.of(null, null),
+            Arguments.of("", "")
+        );
+    }
     // createPost - END
 
     // listPosts - START
@@ -174,7 +212,7 @@ class PostServiceTest {
     // updatePost - START
 
     @Test
-    void updatePost_shouldUpdatePost() throws UnauthorizedException, NotFoundException {
+    void updatePost_shouldUpdatePost() throws UnauthorizedException, NotFoundException, BadRequestException {
         Long postId = 15L;
         PostDto postDto = new PostDto();
         postDto.setBody("new body");
@@ -199,6 +237,8 @@ class PostServiceTest {
     void updatePost_shouldThrowUnauthorizedExceptionIfTokenInvalid() throws UnauthorizedException, NotFoundException {
         Long postId = 12L;
         PostDto postDto = new PostDto();
+        postDto.setSubject("subject text");
+        postDto.setBody("body text");
         when(authService.verifyUser(req)).thenThrow(new UnauthorizedException("Invalid token"));
 
         assertThrows(UnauthorizedException.class, () -> {
@@ -214,6 +254,8 @@ class PostServiceTest {
     void updatePost_shouldThrowNotFoundExceptionIfPostMissing() throws UnauthorizedException {
         Long postId = 13L;
         PostDto postDto = new PostDto();
+        postDto.setSubject("subject text");
+        postDto.setBody("body text");
         when(authService.verifyUser(req)).thenReturn("a@c.com");
         when(postDao.findById(postId)).thenReturn(null);
 
@@ -230,6 +272,8 @@ class PostServiceTest {
     void updatePost_shouldThrowUnauthorizedExceptionIfNotAuthor() throws UnauthorizedException {
         Long postId = 14L;
         PostDto postDto = new PostDto();
+        postDto.setSubject("subject text");
+        postDto.setBody("body text");
         Post post = mock(Post.class);
         when(authService.verifyUser(req)).thenReturn("user@other.com");
         when(postDao.findById(postId)).thenReturn(post);

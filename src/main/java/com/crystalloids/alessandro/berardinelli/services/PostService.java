@@ -2,10 +2,12 @@ package com.crystalloids.alessandro.berardinelli.services;
 
 import com.crystalloids.alessandro.berardinelli.api.dto.PostDto;
 import com.crystalloids.alessandro.berardinelli.api.mappers.PostMapper;
+import com.crystalloids.alessandro.berardinelli.api.validators.PostValidator;
 import com.crystalloids.alessandro.berardinelli.auth.AuthService;
 import com.crystalloids.alessandro.berardinelli.db.dao.PostDao;
 import com.crystalloids.alessandro.berardinelli.db.model.Post;
 import com.crystalloids.alessandro.berardinelli.email.TaskQueueService;
+import com.google.api.server.spi.response.BadRequestException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import org.slf4j.Logger;
@@ -25,18 +27,22 @@ public class PostService {
     private PostDao postDao;
     private TaskQueueService taskQueueService;
     private PostMapper postMapper;
+    private PostValidator postValidator;
 
-    public PostService(AuthService authService, PostDao postDao, TaskQueueService taskQueueService, PostMapper postMapper) {
+    public PostService(AuthService authService, PostDao postDao, TaskQueueService taskQueueService, PostMapper postMapper, PostValidator postValidator) {
         this.authService = authService;
         this.postDao = postDao;
         this.taskQueueService = taskQueueService;
         this.postMapper = postMapper;
+        this.postValidator = postValidator;
     }
 
     public PostService() {
     }
 
-    public PostDto createPost(PostDto postDto, HttpServletRequest req) throws UnauthorizedException {
+    public PostDto createPost(PostDto postDto, HttpServletRequest req) throws UnauthorizedException, BadRequestException {
+
+        postValidator.validateCreation(postDto);
 
         String currentUserEmail = authService.verifyUser(req);
 
@@ -67,7 +73,9 @@ public class PostService {
         return postMapper.toDto(existingPost);
     }
 
-    public PostDto updatePost(PostDto postDto, Long postId, HttpServletRequest req) throws UnauthorizedException, NotFoundException {
+    public PostDto updatePost(PostDto postDto, Long postId, HttpServletRequest req) throws UnauthorizedException, NotFoundException, BadRequestException {
+
+        postValidator.validateUpdate(postDto);
 
         String currentUserEmail = authService.verifyUser(req);
 

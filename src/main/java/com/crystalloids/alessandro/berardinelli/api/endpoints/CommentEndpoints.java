@@ -2,6 +2,7 @@ package com.crystalloids.alessandro.berardinelli.api.endpoints;
 
 import com.crystalloids.alessandro.berardinelli.api.dto.CommentDto;
 import com.crystalloids.alessandro.berardinelli.api.mappers.CommentMapper;
+import com.crystalloids.alessandro.berardinelli.api.validators.CommentValidator;
 import com.crystalloids.alessandro.berardinelli.auth.AuthService;
 import com.crystalloids.alessandro.berardinelli.auth.FirebaseAuthService;
 import com.crystalloids.alessandro.berardinelli.db.dao.CommentDao;
@@ -11,6 +12,7 @@ import com.crystalloids.alessandro.berardinelli.services.CommentService;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.Named;
+import com.google.api.server.spi.response.BadRequestException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 
@@ -29,10 +31,11 @@ public class CommentEndpoints {
     private PostDao postDao = new PostDao();
     private TaskQueueService taskQueueService = new TaskQueueService();
     private CommentMapper commentMapper = new CommentMapper();
-    private final CommentService service = new CommentService(authService, commentDao, postDao, taskQueueService, commentMapper);
+    private CommentValidator commentValidator = new CommentValidator();
+    private final CommentService service = new CommentService(authService, commentDao, postDao, taskQueueService, commentMapper, commentValidator);
 
     @ApiMethod(name = "addComment", path = "posts/{postId}/comments", httpMethod = ApiMethod.HttpMethod.POST)
-    public CommentDto addComment( @Named("postId") Long postId, CommentDto commentDto, HttpServletRequest req) throws UnauthorizedException, NotFoundException {
+    public CommentDto addComment( @Named("postId") Long postId, CommentDto commentDto, HttpServletRequest req) throws UnauthorizedException, NotFoundException, BadRequestException {
         return service.addComment(commentDto, postId, req);
     }
 

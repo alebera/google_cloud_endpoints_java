@@ -2,6 +2,7 @@ package com.crystalloids.alessandro.berardinelli.api.endpoints;
 
 import com.crystalloids.alessandro.berardinelli.api.dto.PostDto;
 import com.crystalloids.alessandro.berardinelli.api.mappers.PostMapper;
+import com.crystalloids.alessandro.berardinelli.api.validators.PostValidator;
 import com.crystalloids.alessandro.berardinelli.auth.AuthService;
 import com.crystalloids.alessandro.berardinelli.auth.FirebaseAuthService;
 import com.crystalloids.alessandro.berardinelli.db.dao.PostDao;
@@ -10,6 +11,7 @@ import com.crystalloids.alessandro.berardinelli.services.PostService;
 import com.google.api.server.spi.config.Api;
 import com.google.api.server.spi.config.ApiMethod;
 import com.google.api.server.spi.config.Named;
+import com.google.api.server.spi.response.BadRequestException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 
@@ -27,10 +29,11 @@ public class PostEndpoints {
     private PostDao postDao = new PostDao();
     private TaskQueueService taskQueueService = new TaskQueueService();
     private PostMapper postMapper = new PostMapper();
-    private final PostService service = new PostService(authService, postDao, taskQueueService, postMapper);
+    private PostValidator postValidator = new PostValidator();
+    private final PostService service = new PostService(authService, postDao, taskQueueService, postMapper, postValidator);
 
     @ApiMethod(name = "createPost", path = "posts", httpMethod = ApiMethod.HttpMethod.POST)
-    public PostDto createPost(PostDto postDto, HttpServletRequest req) throws UnauthorizedException {
+    public PostDto createPost(PostDto postDto, HttpServletRequest req) throws UnauthorizedException, BadRequestException {
         return service.createPost(postDto, req);
     }
 
@@ -41,7 +44,7 @@ public class PostEndpoints {
     }
 
     @ApiMethod(name = "updatePost", path = "posts/{id}", httpMethod = ApiMethod.HttpMethod.PUT)
-    public PostDto updatePost(@Named("id") Long postId, PostDto postDto, HttpServletRequest req) throws UnauthorizedException, NotFoundException {
+    public PostDto updatePost(@Named("id") Long postId, PostDto postDto, HttpServletRequest req) throws UnauthorizedException, NotFoundException, BadRequestException {
         return service.updatePost(postDto, postId, req);
     }
 

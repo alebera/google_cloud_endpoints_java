@@ -2,12 +2,14 @@ package com.crystalloids.alessandro.berardinelli.services;
 
 import com.crystalloids.alessandro.berardinelli.api.dto.CommentDto;
 import com.crystalloids.alessandro.berardinelli.api.mappers.CommentMapper;
+import com.crystalloids.alessandro.berardinelli.api.validators.CommentValidator;
 import com.crystalloids.alessandro.berardinelli.auth.AuthService;
 import com.crystalloids.alessandro.berardinelli.db.dao.CommentDao;
 import com.crystalloids.alessandro.berardinelli.db.dao.PostDao;
 import com.crystalloids.alessandro.berardinelli.db.model.Comment;
 import com.crystalloids.alessandro.berardinelli.db.model.Post;
 import com.crystalloids.alessandro.berardinelli.email.TaskQueueService;
+import com.google.api.server.spi.response.BadRequestException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import org.slf4j.Logger;
@@ -27,19 +29,23 @@ public class CommentService {
     private PostDao postDao;
     private TaskQueueService taskQueueService;
     private CommentMapper commentMapper;
+    private CommentValidator commentValidator;
 
-    public CommentService(AuthService authService, CommentDao commentDao, PostDao postDao, TaskQueueService taskQueueService, CommentMapper commentMapper) {
+    public CommentService(AuthService authService, CommentDao commentDao, PostDao postDao, TaskQueueService taskQueueService, CommentMapper commentMapper, CommentValidator commentValidator) {
         this.authService = authService;
         this.commentDao = commentDao;
         this.postDao = postDao;
         this.taskQueueService = taskQueueService;
         this.commentMapper = commentMapper;
+        this.commentValidator = commentValidator;
     }
 
     public CommentService() {
     }
 
-    public CommentDto addComment(CommentDto commentDto, Long postId, HttpServletRequest req) throws UnauthorizedException, NotFoundException {
+    public CommentDto addComment(CommentDto commentDto, Long postId, HttpServletRequest req) throws UnauthorizedException, NotFoundException, BadRequestException {
+
+        commentValidator.validateCreation(commentDto);
 
         Post existingPost = postDao.findById(postId);
         if (existingPost == null) {

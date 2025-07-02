@@ -2,16 +2,21 @@ package com.crystalloids.alessandro.berardinelli.services;
 
 import com.crystalloids.alessandro.berardinelli.api.dto.CommentDto;
 import com.crystalloids.alessandro.berardinelli.api.mappers.CommentMapper;
+import com.crystalloids.alessandro.berardinelli.api.validators.CommentValidator;
 import com.crystalloids.alessandro.berardinelli.auth.FirebaseAuthService;
 import com.crystalloids.alessandro.berardinelli.db.dao.CommentDao;
 import com.crystalloids.alessandro.berardinelli.db.dao.PostDao;
 import com.crystalloids.alessandro.berardinelli.db.model.Comment;
 import com.crystalloids.alessandro.berardinelli.db.model.Post;
 import com.crystalloids.alessandro.berardinelli.email.TaskQueueService;
+import com.google.api.server.spi.response.BadRequestException;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullAndEmptySource;
+
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -30,6 +35,7 @@ class CommentServiceTest {
     private TaskQueueService taskQueueService;
     private HttpServletRequest req;
     private CommentMapper commentMapper;
+    private CommentValidator commentValidator;
 
     @BeforeEach
     void setUp() {
@@ -38,13 +44,14 @@ class CommentServiceTest {
         postDao = mock(PostDao.class);
         taskQueueService = mock(TaskQueueService.class);
         commentMapper = new CommentMapper();
-        commentService = new CommentService(authService, commentDao, postDao, taskQueueService, commentMapper);
+        commentValidator = new CommentValidator();
+        commentService = new CommentService(authService, commentDao, postDao, taskQueueService, commentMapper, commentValidator);
         req = mock(HttpServletRequest.class);
     }
 
     // addComment - START
     @Test
-    void addComment_shouldCreateAComment() throws UnauthorizedException, NotFoundException {
+    void addComment_shouldCreateAComment() throws UnauthorizedException, NotFoundException, BadRequestException {
         //GIVEN
 
         Long postId = 1L;
@@ -86,6 +93,7 @@ class CommentServiceTest {
     void addComment_shouldThrowNotFoundExceptionIfPostMissing() throws UnauthorizedException {
         Long postId = 2L;
         CommentDto commentDto = new CommentDto();
+        commentDto.setBody("body");
         when(postDao.findById(postId)).thenReturn(null);
 
         assertThrows(NotFoundException.class, () -> {
@@ -103,6 +111,7 @@ class CommentServiceTest {
     void addComment_shouldThrowUnauthorizedExceptionIfTokenInvalid() throws UnauthorizedException {
         Long postId = 3L;
         CommentDto commentDto = new CommentDto();
+        commentDto.setBody("body");
         Post post = new Post();
         post.setId(postId);
 
@@ -115,6 +124,23 @@ class CommentServiceTest {
 
         verify(postDao, times(1)).findById(postId);
         verify(authService, times(1)).verifyUser(req);
+        verify(commentDao, times(0)).save(any());
+        verify(taskQueueService, times(0)).enqueueEmailTask(any(), any(), any());
+    }
+
+    @ParameterizedTest
+    @NullAndEmptySource
+    void addComment_shouldThrowBadRequestExceptionIfBodyIsNullOrEmpty(String body) throws UnauthorizedException {
+        Long postId = 7L;
+        CommentDto commentDto = new CommentDto();
+        commentDto.setBody(body);
+
+        assertThrows(BadRequestException.class, () -> {
+            commentService.addComment(commentDto, postId, req);
+        });
+
+        verify(postDao, times(0)).findById(any());
+        verify(authService, times(0)).verifyUser(any());
         verify(commentDao, times(0)).save(any());
         verify(taskQueueService, times(0)).enqueueEmailTask(any(), any(), any());
     }
