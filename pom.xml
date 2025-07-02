@@ -8,7 +8,6 @@
     <groupId>com.example.appengine</groupId>
     <artifactId>echo-j8</artifactId>
 
-
     <parent>
         <groupId>com.google.cloud.samples</groupId>
         <artifactId>shared-configuration</artifactId>
@@ -16,15 +15,30 @@
     </parent>
 
     <properties>
-        <maven.compiler.target>21</maven.compiler.target>
-        <maven.compiler.source>21</maven.compiler.source>
+        <endpoints.project.id>xxxxxxxx-205215</endpoints.project.id>
+        <maven.compiler.target>1.8</maven.compiler.target>
+        <maven.compiler.source>1.8</maven.compiler.source>
 
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
         <endpoints.framework.version>2.2.2</endpoints.framework.version>
-        <endpoints.management.version>1.0.14</endpoints.management.version>
-
-        <endpoints.project.id>xxxxxxxx-205215</endpoints.project.id>
+        <endpoints-management-control-appengine-all.version>1.0.14</endpoints-management-control-appengine-all.version>
+        <appengine-api-1.0-sdk.version>2.0.23</appengine-api-1.0-sdk.version>
+        <javax.servlet-api.version>3.1.0</javax.servlet-api.version>
+        <google-cloud-firestore.version>3.31.6</google-cloud-firestore.version>
+        <objectify.version>6.1.3</objectify.version>
+        <guava.version>33.4.8-jre</guava.version>
+        <sendgrid-java.version>4.10.3</sendgrid-java.version>
+        <json.version>20250517</json.version>
+        <google-cloud-tasks.version>2.66.0</google-cloud-tasks.version>
+        <firebase-admin.version>9.5.0</firebase-admin.version>
+        <jackson-datatype-jsr310.version>2.19.1</jackson-datatype-jsr310.version>
+        <junit-jupiter.version>5.13.2</junit-jupiter.version>
+        <mockito-core.version>5.18.0</mockito-core.version>
+        <maven-war-plugin.version>3.4.0</maven-war-plugin.version>
+        <appengine-maven-plugin.version>2.5.0</appengine-maven-plugin.version>
+        <endpoints-framework-maven-plugin.version>2.1.0</endpoints-framework-maven-plugin.version>
+        <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
     </properties>
 
     <dependencies>
@@ -38,18 +52,18 @@
         <dependency>
             <groupId>com.google.endpoints</groupId>
             <artifactId>endpoints-management-control-appengine-all</artifactId>
-            <version>1.0.14</version>
+            <version>${endpoints-management-control-appengine-all.version}</version>
         </dependency>
         <!-- [END api_management] -->
         <dependency>
             <groupId>com.google.appengine</groupId>
             <artifactId>appengine-api-1.0-sdk</artifactId>
-            <version>2.0.23</version>
+            <version>${appengine-api-1.0-sdk.version}</version>
         </dependency>
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
-            <version>3.1.0</version>
+            <version>${javax.servlet-api.version}</version>
             <type>jar</type>
             <scope>provided</scope>
         </dependency>
@@ -61,82 +75,76 @@
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-firestore</artifactId>
-            <version>3.31.6</version>
+            <version>${google-cloud-firestore.version}</version>
         </dependency>
         <dependency>
             <groupId>com.googlecode.objectify</groupId>
             <artifactId>objectify</artifactId>
-            <version>6.1.3</version>
+            <version>${objectify.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.guava</groupId>
             <artifactId>guava</artifactId>
-            <version>33.4.8-jre</version>
+            <version>${guava.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.sendgrid</groupId>
             <artifactId>sendgrid-java</artifactId>
-            <version>4.10.3</version>
+            <version>${sendgrid-java.version}</version>
         </dependency>
         <dependency>
             <groupId>org.json</groupId>
             <artifactId>json</artifactId>
-            <version>20250517</version>
+            <version>${json.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.cloud</groupId>
             <artifactId>google-cloud-tasks</artifactId>
-            <version>2.66.0</version>
+            <version>${google-cloud-tasks.version}</version>
         </dependency>
         <dependency>
             <groupId>com.google.firebase</groupId>
             <artifactId>firebase-admin</artifactId>
-            <version>9.5.0</version>
+            <version>${firebase-admin.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.datatype</groupId>
             <artifactId>jackson-datatype-jsr310</artifactId>
-            <version>2.19.1</version>
+            <version>${jackson-datatype-jsr310.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-core</artifactId>
-            <version>2.19.1</version>
+            <version>${jackson-datatype-jsr310.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.19.1</version>
+            <version>${jackson-datatype-jsr310.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
-            <version>2.19.1</version>
+            <version>${jackson-datatype-jsr310.version}</version>
         </dependency>
         <!-- Test dependencies   -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
-            <version>5.13.2</version>
+            <version>${junit-jupiter.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-core</artifactId>
-            <version>5.18.0</version>
+            <version>${mockito-core.version}</version>
             <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-junit-jupiter</artifactId>
-            <version>5.18.0</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>jakarta.servlet</groupId>
-            <artifactId>jakarta.servlet-api</artifactId>
-            <version>6.1.0</version>
+            <version>${mockito-core.version}</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -149,7 +157,7 @@
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-war-plugin</artifactId>
-                <version>3.4.0</version>
+                <version>${maven-war-plugin.version}</version>
                 <configuration>
                     <webResources>
                         <resources>
@@ -163,7 +171,7 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>appengine-maven-plugin</artifactId>
-                <version>2.5.0</version>
+                <version>${appengine-maven-plugin.version}</version>
                 <configuration>
                     <!-- deploy configuration -->
                     <projectId>GCLOUD_CONFIG</projectId>
@@ -174,7 +182,7 @@
             <plugin>
                 <groupId>com.google.cloud.tools</groupId>
                 <artifactId>endpoints-framework-maven-plugin</artifactId>
-                <version>2.1.0</version>
+                <version>${endpoints-framework-maven-plugin.version}</version>
                 <configuration>
                     <!-- plugin configuration -->
                     <hostname>${endpoints.project.id}.appspot.com</hostname>
@@ -185,7 +193,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.13</version>
+                <version>${jacoco-maven-plugin.version}</version>
                 <configuration>
                     <excludes>
                         <exclude>com/sun/**</exclude>
