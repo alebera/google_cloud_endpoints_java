@@ -10,7 +10,9 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
+import javax.validation.constraints.Min;
 
+// TOD: try to use @Data of Lombook
 public class CommentDto {
     private Long id;
     private Long postId;
@@ -37,6 +39,7 @@ public class CommentDto {
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
+    //TODO: try to use mapstruct ro map
     // Mapping from entity to DTO
     public static CommentDto fromEntity(Comment comment) {
         CommentDto dto = new CommentDto();

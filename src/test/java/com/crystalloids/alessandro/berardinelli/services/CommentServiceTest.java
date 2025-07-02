@@ -42,6 +42,8 @@ class CommentServiceTest {
     // addComment - START
     @Test
     void addComment_shouldCreateAComment() throws UnauthorizedException, NotFoundException {
+        //GIVEN
+
         Long postId = 1L;
         CommentDto commentDto = new CommentDto();
         commentDto.setBody("test comment");
@@ -63,8 +65,10 @@ class CommentServiceTest {
 
         when(commentDao.save(any(Comment.class))).thenReturn(savedComment);
 
+        //DO
         CommentDto result = commentService.addComment(commentDto, postId, req);
 
+        //VERIFY
         assertEquals("user@email.com", result.getAuthor());
         assertEquals("test comment", result.getBody());
         assertEquals(postId, result.getPostId());

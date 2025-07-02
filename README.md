@@ -3,7 +3,9 @@
 ## Setup
 
 ```shell
+gcloud auth application-default login
 gcloud config set project xxxxxxxx-205215
+export DATASTORE_PROJECT_ID=xxxxxxxx-205215
 mvn clean install
 mvn appengine:run -Dappengine.projectId=xxxxxxxx-205215
 ```
