@@ -39,6 +39,8 @@
         <appengine-maven-plugin.version>2.5.0</appengine-maven-plugin.version>
         <endpoints-framework-maven-plugin.version>2.1.0</endpoints-framework-maven-plugin.version>
         <jacoco-maven-plugin.version>0.8.13</jacoco-maven-plugin.version>
+        <slf4j-api.version>2.0.17</slf4j-api.version>
+        <logback-classic.version>1.5.18</logback-classic.version>
     </properties>
 
     <dependencies>
@@ -127,6 +129,17 @@
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-annotations</artifactId>
             <version>${jackson-datatype-jsr310.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j-api.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback-classic.version}</version>
+            <scope>runtime</scope>
         </dependency>
         <!-- Test dependencies   -->
         <dependency>

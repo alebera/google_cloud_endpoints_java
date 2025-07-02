@@ -2,10 +2,13 @@ package com.crystalloids.alessandro.berardinelli.email;
 
 import com.google.cloud.tasks.v2.*;
 import com.google.protobuf.ByteString;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.nio.charset.StandardCharsets;
 
-public class TaskQueueUtil {
+public class TaskQueueService {
+    private static final Logger logger = LoggerFactory.getLogger(TaskQueueService.class);
 
     private static final String PROJECT_ID = "xxxxxxxx-205215";
     private static final String LOCATION = "us-central1";
@@ -32,8 +35,9 @@ public class TaskQueueUtil {
             QueueName queueName = QueueName.of(PROJECT_ID, LOCATION, QUEUE_NAME);
 
             client.createTask(queueName, task);
+            logger.info("Email sent successfully to {}", to);
         } catch (Exception e) {
-            e.printStackTrace();
+            logger.error("Error sending email to {}", to);
         }
     }
 

@@ -1,32 +1,36 @@
 package com.crystalloids.alessandro.berardinelli.services;
 
-import com.crystalloids.alessandro.berardinelli.auth.FirebaseAuthService;
-import com.crystalloids.alessandro.berardinelli.email.TaskQueueUtil;
+import com.crystalloids.alessandro.berardinelli.api.dto.CommentDto;
+import com.crystalloids.alessandro.berardinelli.auth.AuthService;
 import com.crystalloids.alessandro.berardinelli.db.dao.CommentDao;
 import com.crystalloids.alessandro.berardinelli.db.dao.PostDao;
-import com.crystalloids.alessandro.berardinelli.api.dto.CommentDto;
 import com.crystalloids.alessandro.berardinelli.db.model.Comment;
 import com.crystalloids.alessandro.berardinelli.db.model.Post;
+import com.crystalloids.alessandro.berardinelli.email.TaskQueueService;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
 import java.util.List;
 
 public class CommentService {
+    private static final Logger logger = LoggerFactory.getLogger(CommentService.class);
+
     private static final String EMAIL_SUBJECT = "Your post received a comment";
     private static final String EMAIL_CONTENT = "Someone commented on your post, click here to see details";
-    private FirebaseAuthService authService = new FirebaseAuthService();
+    private AuthService authService;
     private CommentDao commentDao;
-    private TaskQueueUtil taskQueueUtil;
     private PostDao postDao;
+    private TaskQueueService taskQueueService;
 
-    public CommentService(FirebaseAuthService authService, CommentDao commentDao, PostDao postDao, TaskQueueUtil taskQueueUtil) {
+    public CommentService(AuthService authService, CommentDao commentDao, PostDao postDao, TaskQueueService taskQueueService) {
         this.authService = authService;
         this.commentDao = commentDao;
         this.postDao = postDao;
-        this.taskQueueUtil = taskQueueUtil;
+        this.taskQueueService = taskQueueService;
     }
 
     public CommentService() {
@@ -39,7 +43,7 @@ public class CommentService {
             throw new NotFoundException("Post not found");
         }
 
-        String currentUserEmail = authService.verifyToken(req).getEmail();
+        String currentUserEmail = authService.verifyUser(req);
 
         commentDto.setAuthor(currentUserEmail);
         commentDto.setCreatedAt(LocalDateTime.now());
@@ -49,7 +53,9 @@ public class CommentService {
         comment = commentDao.save(comment);
 
         // send email
-        taskQueueUtil.enqueueEmailTask(existingPost.getAuthor(), EMAIL_SUBJECT, EMAIL_CONTENT);
+        taskQueueService.enqueueEmailTask(existingPost.getAuthor(), EMAIL_SUBJECT, EMAIL_CONTENT);
+
+        logger.info("Comment added on post {}", postId);
 
         return CommentDto.fromEntity(comment);
     }

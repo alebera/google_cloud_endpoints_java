@@ -1,13 +1,12 @@
 package com.crystalloids.alessandro.berardinelli.services;
 
+import com.crystalloids.alessandro.berardinelli.api.dto.PostDto;
 import com.crystalloids.alessandro.berardinelli.auth.FirebaseAuthService;
 import com.crystalloids.alessandro.berardinelli.db.dao.PostDao;
-import com.crystalloids.alessandro.berardinelli.api.dto.PostDto;
 import com.crystalloids.alessandro.berardinelli.db.model.Post;
-import com.crystalloids.alessandro.berardinelli.email.TaskQueueUtil;
+import com.crystalloids.alessandro.berardinelli.email.TaskQueueService;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
-import com.google.firebase.auth.FirebaseToken;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
@@ -25,19 +24,17 @@ class PostServiceTest {
 
     private PostService postService;
     private PostDao postDao;
-    private TaskQueueUtil taskQueueUtil;
+    private TaskQueueService taskQueueService;
     private HttpServletRequest req;
     private FirebaseAuthService authService;
-    private FirebaseToken jwt;
 
     @BeforeEach
     void setUp() {
         authService = mock(FirebaseAuthService.class);
         postDao = mock(PostDao.class);
-        taskQueueUtil = mock(TaskQueueUtil.class);
-        postService = new PostService(authService, postDao, taskQueueUtil);
+        taskQueueService = mock(TaskQueueService.class);
+        postService = new PostService(authService, postDao, taskQueueService);
         req = mock(HttpServletRequest.class);
-        jwt = mock(FirebaseToken.class);
     }
 
     // createPost - START
@@ -47,8 +44,7 @@ class PostServiceTest {
         PostDto postDto = new PostDto();
         postDto.setSubject("new post");
         postDto.setBody("lorem ipsum");
-        when(authService.verifyToken(req)).thenReturn(jwt);
-        when(jwt.getEmail()).thenReturn("a@c.com");
+        when(authService.verifyUser(req)).thenReturn("a@c.com");
 
         ArgumentCaptor<Post> postCaptor = ArgumentCaptor.forClass(Post.class);
         Post savedPost = new Post();
@@ -73,23 +69,23 @@ class PostServiceTest {
         assertNotNull(captured.getCreatedAt());
         assertNull(captured.getUpdatedAt());
 
-        verify(authService, times(1)).verifyToken(req);
+        verify(authService, times(1)).verifyUser(req);
         verify(postDao, times(1)).save(captured);
-        verify(taskQueueUtil, times(1)).enqueueEmailTask(captured.getAuthor(), "Post is created", "You just created a post successfully");
+        verify(taskQueueService, times(1)).enqueueEmailTask(captured.getAuthor(), "Post is created", "You just created a post successfully");
     }
 
     @Test
     void createPost_shouldThrowUnauthorizedExceptionIfTokenInvalid() throws UnauthorizedException {
         PostDto postDto = new PostDto();
-        when(authService.verifyToken(req)).thenThrow(new UnauthorizedException("Invalid token"));
+        when(authService.verifyUser(req)).thenThrow(new UnauthorizedException("Invalid token"));
 
         assertThrows(UnauthorizedException.class, () -> {
             postService.createPost(postDto, req);
         });
 
-        verify(authService, times(1)).verifyToken(req);
+        verify(authService, times(1)).verifyUser(req);
         verify(postDao, times(0)).save(any());
-        verify(taskQueueUtil, times(0)).enqueueEmailTask(any(),any(),any());
+        verify(taskQueueService, times(0)).enqueueEmailTask(any(),any(),any());
     }
 
     // createPost - END
@@ -181,8 +177,7 @@ class PostServiceTest {
         postDto.setBody("new body");
         postDto.setSubject("new subject");
         Post post = mock(Post.class);
-        when(authService.verifyToken(req)).thenReturn(jwt);
-        when(jwt.getEmail()).thenReturn("a@c.com");
+        when(authService.verifyUser(req)).thenReturn("a@c.com");
         when(postDao.findById(postId)).thenReturn(post);
         when(post.isFromAuthor("a@c.com")).thenReturn(true);
 
@@ -201,13 +196,13 @@ class PostServiceTest {
     void updatePost_shouldThrowUnauthorizedExceptionIfTokenInvalid() throws UnauthorizedException, NotFoundException {
         Long postId = 12L;
         PostDto postDto = new PostDto();
-        when(authService.verifyToken(req)).thenThrow(new UnauthorizedException("Invalid token"));
+        when(authService.verifyUser(req)).thenThrow(new UnauthorizedException("Invalid token"));
 
         assertThrows(UnauthorizedException.class, () -> {
             postService.updatePost(postDto, postId, req);
         });
 
-        verify(authService, times(1)).verifyToken(req);
+        verify(authService, times(1)).verifyUser(req);
         verify(postDao, times(0)).findById(postId);
         verify(postDao, times(0)).save(any(Post.class));
     }
@@ -216,15 +211,14 @@ class PostServiceTest {
     void updatePost_shouldThrowNotFoundExceptionIfPostMissing() throws UnauthorizedException {
         Long postId = 13L;
         PostDto postDto = new PostDto();
-        when(authService.verifyToken(req)).thenReturn(jwt);
-        when(jwt.getEmail()).thenReturn("a@c.com");
+        when(authService.verifyUser(req)).thenReturn("a@c.com");
         when(postDao.findById(postId)).thenReturn(null);
 
         assertThrows(NotFoundException.class, () -> {
             postService.updatePost(postDto, postId, req);
         });
 
-        verify(authService, times(1)).verifyToken(req);
+        verify(authService, times(1)).verifyUser(req);
         verify(postDao, times(1)).findById(postId);
         verify(postDao, times(0)).save(any(Post.class));
     }
@@ -234,8 +228,7 @@ class PostServiceTest {
         Long postId = 14L;
         PostDto postDto = new PostDto();
         Post post = mock(Post.class);
-        when(authService.verifyToken(req)).thenReturn(jwt);
-        when(jwt.getEmail()).thenReturn("user@other.com");
+        when(authService.verifyUser(req)).thenReturn("user@other.com");
         when(postDao.findById(postId)).thenReturn(post);
         when(post.isFromAuthor("user@other.com")).thenReturn(false);
 
@@ -243,7 +236,7 @@ class PostServiceTest {
             postService.updatePost(postDto, postId, req);
         });
 
-        verify(authService, times(1)).verifyToken(req);
+        verify(authService, times(1)).verifyUser(req);
         verify(postDao, times(1)).findById(postId);
         verify(postDao, times(0)).save(any(Post.class));
         verify(post, times(1)).isFromAuthor("user@other.com");

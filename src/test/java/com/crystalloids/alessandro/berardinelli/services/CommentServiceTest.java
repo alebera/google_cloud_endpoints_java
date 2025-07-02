@@ -1,15 +1,14 @@
 package com.crystalloids.alessandro.berardinelli.services;
 
+import com.crystalloids.alessandro.berardinelli.api.dto.CommentDto;
 import com.crystalloids.alessandro.berardinelli.auth.FirebaseAuthService;
 import com.crystalloids.alessandro.berardinelli.db.dao.CommentDao;
 import com.crystalloids.alessandro.berardinelli.db.dao.PostDao;
-import com.crystalloids.alessandro.berardinelli.api.dto.CommentDto;
 import com.crystalloids.alessandro.berardinelli.db.model.Comment;
 import com.crystalloids.alessandro.berardinelli.db.model.Post;
-import com.crystalloids.alessandro.berardinelli.email.TaskQueueUtil;
+import com.crystalloids.alessandro.berardinelli.email.TaskQueueService;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
-import com.google.firebase.auth.FirebaseToken;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -27,19 +26,17 @@ class CommentServiceTest {
     private FirebaseAuthService authService;
     private CommentDao commentDao;
     private PostDao postDao;
-    private TaskQueueUtil taskQueueUtil;
+    private TaskQueueService taskQueueService;
     private HttpServletRequest req;
-    private FirebaseToken jwt;
 
     @BeforeEach
     void setUp() {
         authService = mock(FirebaseAuthService.class);
         commentDao = mock(CommentDao.class);
         postDao = mock(PostDao.class);
-        taskQueueUtil = mock(TaskQueueUtil.class);
-        commentService = new CommentService(authService, commentDao, postDao, taskQueueUtil);
+        taskQueueService = mock(TaskQueueService.class);
+        commentService = new CommentService(authService, commentDao, postDao, taskQueueService);
         req = mock(HttpServletRequest.class);
-        jwt = mock(FirebaseToken.class);
     }
 
     // addComment - START
@@ -56,8 +53,7 @@ class CommentServiceTest {
         post.setAuthor("author@email.com");
 
         when(postDao.findById(postId)).thenReturn(post);
-        when(authService.verifyToken(req)).thenReturn(jwt);
-        when(jwt.getEmail()).thenReturn("user@email.com");
+        when(authService.verifyUser(req)).thenReturn("user@email.com");
 
         Comment savedComment = new Comment();
         savedComment.setId(10L);
@@ -78,9 +74,9 @@ class CommentServiceTest {
         assertNotNull(result.getCreatedAt());
 
         verify(postDao, times(1)).findById(postId);
-        verify(authService, times(1)).verifyToken(req);
+        verify(authService, times(1)).verifyUser(req);
         verify(commentDao, times(1)).save(any());
-        verify(taskQueueUtil, times(1)).enqueueEmailTask(post.getAuthor(), "Your post received a comment", "Someone commented on your post, click here to see details");
+        verify(taskQueueService, times(1)).enqueueEmailTask(post.getAuthor(), "Your post received a comment", "Someone commented on your post, click here to see details");
     }
 
     @Test
@@ -94,9 +90,9 @@ class CommentServiceTest {
         });
 
         verify(postDao, times(1)).findById(postId);
-        verify(authService, times(0)).verifyToken(req);
+        verify(authService, times(0)).verifyUser(req);
         verify(commentDao, times(0)).save(any());
-        verify(taskQueueUtil, times(0)).enqueueEmailTask(any(), any(), any());
+        verify(taskQueueService, times(0)).enqueueEmailTask(any(), any(), any());
 
     }
 
@@ -108,16 +104,16 @@ class CommentServiceTest {
         post.setId(postId);
 
         when(postDao.findById(postId)).thenReturn(post);
-        when(authService.verifyToken(req)).thenThrow(new UnauthorizedException("Invalid token"));
+        when(authService.verifyUser(req)).thenThrow(new UnauthorizedException("Invalid token"));
 
         assertThrows(UnauthorizedException.class, () -> {
             commentService.addComment(commentDto, postId, req);
         });
 
         verify(postDao, times(1)).findById(postId);
-        verify(authService, times(1)).verifyToken(req);
+        verify(authService, times(1)).verifyUser(req);
         verify(commentDao, times(0)).save(any());
-        verify(taskQueueUtil, times(0)).enqueueEmailTask(any(), any(), any());
+        verify(taskQueueService, times(0)).enqueueEmailTask(any(), any(), any());
     }
 
     // addComment - END

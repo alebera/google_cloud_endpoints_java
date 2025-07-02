@@ -1,12 +1,15 @@
 package com.crystalloids.alessandro.berardinelli.services;
 
-import com.crystalloids.alessandro.berardinelli.auth.FirebaseAuthService;
-import com.crystalloids.alessandro.berardinelli.email.TaskQueueUtil;
-import com.crystalloids.alessandro.berardinelli.db.dao.PostDao;
 import com.crystalloids.alessandro.berardinelli.api.dto.PostDto;
+import com.crystalloids.alessandro.berardinelli.auth.AuthService;
+import com.crystalloids.alessandro.berardinelli.auth.FirebaseAuthService;
+import com.crystalloids.alessandro.berardinelli.db.dao.PostDao;
 import com.crystalloids.alessandro.berardinelli.db.model.Post;
+import com.crystalloids.alessandro.berardinelli.email.TaskQueueService;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import java.time.LocalDateTime;
@@ -14,16 +17,18 @@ import java.util.List;
 
 public class PostService {
 
+    private static final Logger logger = LoggerFactory.getLogger(PostService.class);
+
     private static final String EMAIL_SUBJECT = "Post is created";
     private static final String EMAIL_CONTENT = "You just created a post successfully";
-    private FirebaseAuthService authService = new FirebaseAuthService();
-    private PostDao postDao = new PostDao();
-    private TaskQueueUtil taskQueueUtil;
+    private AuthService authService;
+    private PostDao postDao;
+    private TaskQueueService taskQueueService;
 
-    public PostService(FirebaseAuthService authService, PostDao postDao, TaskQueueUtil taskQueueUtil) {
+    public PostService(AuthService authService, PostDao postDao, TaskQueueService taskQueueService) {
         this.authService = authService;
         this.postDao = postDao;
-        this.taskQueueUtil = taskQueueUtil;
+        this.taskQueueService = taskQueueService;
     }
 
     public PostService() {
@@ -31,7 +36,7 @@ public class PostService {
 
     public PostDto createPost(PostDto postDto, HttpServletRequest req) throws UnauthorizedException {
 
-        String currentUserEmail = authService.verifyToken(req).getEmail();
+        String currentUserEmail = authService.verifyUser(req);
 
         postDto.setAuthor(currentUserEmail);
         postDto.setCreatedAt(LocalDateTime.now());
@@ -41,7 +46,9 @@ public class PostService {
         post = postDao.save(post);
 
         // send email
-        taskQueueUtil.enqueueEmailTask(post.getAuthor(), EMAIL_SUBJECT, EMAIL_CONTENT);
+        taskQueueService.enqueueEmailTask(post.getAuthor(), EMAIL_SUBJECT, EMAIL_CONTENT);
+
+        logger.info("New post is created");
 
         return PostDto.fromEntity(post);
     }
@@ -60,7 +67,7 @@ public class PostService {
 
     public PostDto updatePost(PostDto postDto, Long postId, HttpServletRequest req) throws UnauthorizedException, NotFoundException {
 
-        String currentUserEmail = authService.verifyToken(req).getEmail();
+        String currentUserEmail = authService.verifyUser(req);
 
         Post existingPost = getPostEntity(postId);
         if (existingPost == null) {
@@ -75,6 +82,8 @@ public class PostService {
         existingPost.setUpdatedAt(LocalDateTime.now());
 
         postDao.save(existingPost);
+
+        logger.info("Post with id {} is updated", postId);
 
         return PostDto.fromEntity(existingPost);
     }
