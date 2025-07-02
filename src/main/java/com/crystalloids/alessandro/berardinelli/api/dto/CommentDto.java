@@ -1,18 +1,23 @@
 package com.crystalloids.alessandro.berardinelli.api.dto;
 
 import com.crystalloids.alessandro.berardinelli.db.model.Comment;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import javax.validation.constraints.Min;
-
-// TOD: try to use @Data of Lombook
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class CommentDto {
     private Long id;
     private Long postId;
@@ -22,22 +27,6 @@ public class CommentDto {
     @JsonDeserialize(using = LocalDateTimeDeserializer.class)
     @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime createdAt;
-
-    // Getters and setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
-
-    public Long getPostId() { return postId; }
-    public void setPostId(Long postId) { this.postId = postId; }
-
-    public String getAuthor() { return author; }
-    public void setAuthor(String author) { this.author = author; }
-
-    public String getBody() { return body; }
-    public void setBody(String body) { this.body = body; }
-
-    public LocalDateTime getCreatedAt() { return createdAt; }
-    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 
     //TODO: try to use mapstruct ro map
     // Mapping from entity to DTO
