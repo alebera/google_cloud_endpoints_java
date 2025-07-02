@@ -21,7 +21,7 @@
         <servlet-class>com.google.api.server.spi.EndpointsServlet</servlet-class>
         <init-param>
             <param-name>services</param-name>
-            <param-value>com.crystalloids.alessandro.berardinelli.api.endpoints.PostEndpoints,com.crystalloids.alessandro.berardinelli.api.endpoints.CommentEndpoints</param-value>
+            <param-value>com.crystalloids.alessandro.berardinelli.api.endpoints.PostEndpoints,com.crystalloids.alessandro.berardinelli.api.endpoints.CommentEndpoints,com.crystalloids.alessandro.berardinelli.api.endpoints.EmailNotificationEndpoints</param-value>
         </init-param>
     </servlet>
 
