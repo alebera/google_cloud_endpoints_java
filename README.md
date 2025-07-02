@@ -1,5 +1,18 @@
 # Blog API - Usage Guide
 
+This is a simple java web app to expose CRUD operations on blog posts with comments.
+
+Technologies used:
+- Google Cloud App Engine
+- Google Cloud Endpoints
+- Google Cloud Datastore Firestore
+- Google Cloud Firebase Auth
+
+Prerequisites:
+- Java 8
+- Maven
+- Google Cloud SDK
+
 ## Setup
 
 ```shell
@@ -13,6 +26,8 @@ mvn appengine:run -Dappengine.projectId=xxxxxxxx-205215
 https://cloud.google.com/endpoints/docs/frameworks/java/get-started-frameworks-java
 
 ## Data example:
+
+Here an example of Post and Comment data:
 
 # Post :
 ```json
@@ -38,7 +53,7 @@ https://cloud.google.com/endpoints/docs/frameworks/java/get-started-frameworks-j
 ```
 
 
-## CURL commands for APIs
+## Test the APIs
 
 # 1. Create a new post 
 This endpoint is protected by JWT
