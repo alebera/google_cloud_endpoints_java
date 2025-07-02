@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public class CommentService {
+    private static final String EMAIL_SUBJECT = "Your post received a comment";
+    private static final String EMAIL_CONTENT = "Someone commented on your post, click here to see details";
     private FirebaseAuthService authService = new FirebaseAuthService();
     private CommentDao commentDao;
     private TaskQueueUtil taskQueueUtil;
@@ -47,7 +49,7 @@ public class CommentService {
         comment = commentDao.save(comment);
 
         // send email
-        taskQueueUtil.enqueueEmailTask(existingPost.getAuthor(), "Your post received a comment", "Someone commented on your post, click here to see details");
+        taskQueueUtil.enqueueEmailTask(existingPost.getAuthor(), EMAIL_SUBJECT, EMAIL_CONTENT);
 
         return CommentDto.fromEntity(comment);
     }

@@ -14,6 +14,8 @@ import java.util.List;
 
 public class PostService {
 
+    private static final String EMAIL_SUBJECT = "Post is created";
+    private static final String EMAIL_CONTENT = "You just created a post successfully";
     private FirebaseAuthService authService = new FirebaseAuthService();
     private PostDao postDao = new PostDao();
     private TaskQueueUtil taskQueueUtil;
@@ -39,7 +41,7 @@ public class PostService {
         post = postDao.save(post);
 
         // send email
-        taskQueueUtil.enqueueEmailTask(post.getAuthor(), "Post is created", "You just created a post successfully");
+        taskQueueUtil.enqueueEmailTask(post.getAuthor(), EMAIL_SUBJECT, EMAIL_CONTENT);
 
         return PostDto.fromEntity(post);
     }
