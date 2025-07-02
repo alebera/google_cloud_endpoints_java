@@ -4,6 +4,7 @@ import com.crystalloids.alessandro.berardinelli.auth.FirebaseAuthService;
 import com.crystalloids.alessandro.berardinelli.db.dao.PostDao;
 import com.crystalloids.alessandro.berardinelli.api.dto.PostDto;
 import com.crystalloids.alessandro.berardinelli.db.model.Post;
+import com.crystalloids.alessandro.berardinelli.email.TaskQueueUtil;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.firebase.auth.FirebaseToken;
@@ -24,6 +25,7 @@ class PostServiceTest {
 
     private PostService postService;
     private PostDao postDao;
+    private TaskQueueUtil taskQueueUtil;
     private HttpServletRequest req;
     private FirebaseAuthService authService;
     private FirebaseToken jwt;
@@ -32,7 +34,8 @@ class PostServiceTest {
     void setUp() {
         authService = mock(FirebaseAuthService.class);
         postDao = mock(PostDao.class);
-        postService = new PostService(authService, postDao);
+        taskQueueUtil = mock(TaskQueueUtil.class);
+        postService = new PostService(authService, postDao, taskQueueUtil);
         req = mock(HttpServletRequest.class);
         jwt = mock(FirebaseToken.class);
     }
@@ -72,6 +75,7 @@ class PostServiceTest {
 
         verify(authService, times(1)).verifyToken(req);
         verify(postDao, times(1)).save(captured);
+        verify(taskQueueUtil, times(1)).enqueueEmailTask(captured.getAuthor(), "Post is created", "You just created a post successfully");
     }
 
     @Test
@@ -85,6 +89,7 @@ class PostServiceTest {
 
         verify(authService, times(1)).verifyToken(req);
         verify(postDao, times(0)).save(any());
+        verify(taskQueueUtil, times(0)).enqueueEmailTask(any(),any(),any());
     }
 
     // createPost - END

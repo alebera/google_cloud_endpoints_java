@@ -6,6 +6,7 @@ import com.crystalloids.alessandro.berardinelli.db.dao.PostDao;
 import com.crystalloids.alessandro.berardinelli.api.dto.CommentDto;
 import com.crystalloids.alessandro.berardinelli.db.model.Comment;
 import com.crystalloids.alessandro.berardinelli.db.model.Post;
+import com.crystalloids.alessandro.berardinelli.email.TaskQueueUtil;
 import com.google.api.server.spi.response.NotFoundException;
 import com.google.api.server.spi.response.UnauthorizedException;
 import com.google.firebase.auth.FirebaseToken;
@@ -26,6 +27,7 @@ class CommentServiceTest {
     private FirebaseAuthService authService;
     private CommentDao commentDao;
     private PostDao postDao;
+    private TaskQueueUtil taskQueueUtil;
     private HttpServletRequest req;
     private FirebaseToken jwt;
 
@@ -34,7 +36,8 @@ class CommentServiceTest {
         authService = mock(FirebaseAuthService.class);
         commentDao = mock(CommentDao.class);
         postDao = mock(PostDao.class);
-        commentService = new CommentService(authService, commentDao, postDao);
+        taskQueueUtil = mock(TaskQueueUtil.class);
+        commentService = new CommentService(authService, commentDao, postDao, taskQueueUtil);
         req = mock(HttpServletRequest.class);
         jwt = mock(FirebaseToken.class);
     }
@@ -77,6 +80,7 @@ class CommentServiceTest {
         verify(postDao, times(1)).findById(postId);
         verify(authService, times(1)).verifyToken(req);
         verify(commentDao, times(1)).save(any());
+        verify(taskQueueUtil, times(1)).enqueueEmailTask(post.getAuthor(), "Your post received a comment", "Someone commented on your post, click here to see details");
     }
 
     @Test
@@ -92,6 +96,8 @@ class CommentServiceTest {
         verify(postDao, times(1)).findById(postId);
         verify(authService, times(0)).verifyToken(req);
         verify(commentDao, times(0)).save(any());
+        verify(taskQueueUtil, times(0)).enqueueEmailTask(any(), any(), any());
+
     }
 
     @Test
@@ -111,6 +117,7 @@ class CommentServiceTest {
         verify(postDao, times(1)).findById(postId);
         verify(authService, times(1)).verifyToken(req);
         verify(commentDao, times(0)).save(any());
+        verify(taskQueueUtil, times(0)).enqueueEmailTask(any(), any(), any());
     }
 
     // addComment - END

@@ -16,10 +16,12 @@ public class PostService {
 
     private FirebaseAuthService authService = new FirebaseAuthService();
     private PostDao postDao = new PostDao();
+    private TaskQueueUtil taskQueueUtil;
 
-    public PostService(FirebaseAuthService authService, PostDao postDao) {
+    public PostService(FirebaseAuthService authService, PostDao postDao, TaskQueueUtil taskQueueUtil) {
         this.authService = authService;
         this.postDao = postDao;
+        this.taskQueueUtil = taskQueueUtil;
     }
 
     public PostService() {
@@ -37,7 +39,7 @@ public class PostService {
         post = postDao.save(post);
 
         // send email
-        TaskQueueUtil.enqueueEmailTask(post.getAuthor(), "Post is created", "You just created a post successfully");
+        taskQueueUtil.enqueueEmailTask(post.getAuthor(), "Post is created", "You just created a post successfully");
 
         return PostDto.fromEntity(post);
     }

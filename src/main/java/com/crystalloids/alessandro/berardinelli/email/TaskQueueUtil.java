@@ -7,7 +7,7 @@ import java.nio.charset.StandardCharsets;
 
 public class TaskQueueUtil {
 
-    public static void enqueueEmailTask(String to, String subject, String body) {
+    public void enqueueEmailTask(String to, String subject, String body) {
         try {
             String projectId = "xxxxxxxx-205215";
             String location = "us-central1";

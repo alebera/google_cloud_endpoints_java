@@ -17,12 +17,14 @@ import java.util.List;
 public class CommentService {
     private FirebaseAuthService authService = new FirebaseAuthService();
     private CommentDao commentDao;
+    private TaskQueueUtil taskQueueUtil;
     private PostDao postDao;
 
-    public CommentService(FirebaseAuthService authService, CommentDao commentDao, PostDao postDao) {
+    public CommentService(FirebaseAuthService authService, CommentDao commentDao, PostDao postDao, TaskQueueUtil taskQueueUtil) {
         this.authService = authService;
         this.commentDao = commentDao;
         this.postDao = postDao;
+        this.taskQueueUtil = taskQueueUtil;
     }
 
     public CommentService() {
@@ -45,7 +47,7 @@ public class CommentService {
         comment = commentDao.save(comment);
 
         // send email
-        TaskQueueUtil.enqueueEmailTask(existingPost.getAuthor(), "Your post received a comment", "Someone commented on your post, click here to see details ");
+        taskQueueUtil.enqueueEmailTask(existingPost.getAuthor(), "Your post received a comment", "Someone commented on your post, click here to see details");
 
         return CommentDto.fromEntity(comment);
     }
